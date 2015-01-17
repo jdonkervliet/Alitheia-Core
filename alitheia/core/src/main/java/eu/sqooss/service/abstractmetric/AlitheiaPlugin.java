@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import eu.sqooss.service.db.DAObject;
+import eu.sqooss.service.db.IDAObject;
 import eu.sqooss.service.db.Metric;
 import eu.sqooss.service.db.MetricType;
 import eu.sqooss.service.db.PluginConfiguration;
@@ -146,7 +147,7 @@ public interface AlitheiaPlugin {
      * @throws MetricMismatchException if the DAO type is one not supported by
      *          this metric.
      */
-    List<Result> getResultIfAlreadyCalculated(DAObject o, List<Metric> l)
+    List<Result> getResultIfAlreadyCalculated(IDAObject o, List<Metric> l)
     	throws MetricMismatchException;
 
     /**
@@ -167,7 +168,7 @@ public interface AlitheiaPlugin {
      * @throws Exception All exceptions initiated by the errors in code 
      * included in implemenations of those classes.           
      */
-    List<Result> getResult(DAObject o, List<Metric> l)
+    List<Result> getResult(IDAObject o, List<Metric> l)
         throws MetricMismatchException, AlreadyProcessingException, Exception;
 
     /**
@@ -208,7 +209,7 @@ public interface AlitheiaPlugin {
      * currently locked for processing by another thread. 
      * @throws Exception Any other exception initiated from the plugin code
      */
-    void run(DAObject o) throws MetricMismatchException, 
+    void run(IDAObject o) throws MetricMismatchException, 
         AlreadyProcessingException, Exception;
 
     /**

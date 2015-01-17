@@ -42,6 +42,7 @@ import eu.sqooss.core.AlitheiaCore;
 import eu.sqooss.core.AlitheiaCoreService;
 import eu.sqooss.service.db.ClusterNode;
 import eu.sqooss.service.db.DBService;
+import eu.sqooss.service.db.Project;
 import eu.sqooss.service.db.StoredProject;
 import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.tds.DataAccessor;
@@ -148,7 +149,7 @@ public class TDSServiceImpl implements TDSService, AlitheiaCoreService {
         
         if (db != null && db.startDBSession()) {
             
-            for (StoredProject p : ClusterNode.thisNode().getProjects()) {
+            for (Project p : ClusterNode.thisNode().getProjects()) {
                 addAccessor(p.getId(), p.getName(), p.getBtsUrl(), 
                         p.getMailUrl(), p.getScmUrl());
             }

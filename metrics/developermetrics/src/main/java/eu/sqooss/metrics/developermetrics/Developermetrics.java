@@ -45,6 +45,7 @@ import eu.sqooss.service.abstractmetric.Result;
 import eu.sqooss.service.abstractmetric.Result.ResultType;
 import eu.sqooss.service.db.Developer;
 import eu.sqooss.service.db.Directory;
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.Metric;
 import eu.sqooss.service.db.ProjectDirectory;
 import eu.sqooss.service.db.ProjectFile;
@@ -137,13 +138,13 @@ public class Developermetrics extends AbstractMetric {
         int eyeballs = 0;
         Metric m = null;
         if (a.getIsDirectory()) {
-            List<ProjectFile> files = a.getProjectVersion().getFiles(
+            List<IProjectFile> files = a.getProjectVersion().getFiles(
                     Directory.getDirectory(a.getFileName(), false), 
                     ProjectVersion.MASK_FILES);
             
             Set<Developer> distinctdevs = new HashSet<Developer>(); 
             
-            for (ProjectFile pf : files) {
+            for (IProjectFile pf : files) {
                 distinctdevs.addAll(fileEyeballs(pf));
             }
             eyeballs = distinctdevs.size();
@@ -159,7 +160,7 @@ public class Developermetrics extends AbstractMetric {
         db.addRecord(pfm);
     }
 
-    private List<Developer> fileEyeballs(ProjectFile a) {
+    private List<Developer> fileEyeballs(IProjectFile a) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("paramName", a.getName());
         params.put("paramDir", a.getDir());

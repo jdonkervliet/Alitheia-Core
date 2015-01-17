@@ -49,6 +49,7 @@ import eu.sqooss.service.abstractmetric.MetricDecl;
 import eu.sqooss.service.abstractmetric.MetricDeclarations;
 import eu.sqooss.service.abstractmetric.Result;
 import eu.sqooss.service.db.Directory;
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.Metric;
 import eu.sqooss.service.db.ProjectDirectory;
 import eu.sqooss.service.db.ProjectFile;
@@ -101,7 +102,7 @@ public class ModuleMetricsImplementation extends AbstractMetric {
         return getResult(pv, ProjectVersionMeasurement.class, m, Result.ResultType.FLOAT);
     }
 
-    public void run(ProjectFile pf) throws AlreadyProcessingException {
+    public void run(IProjectFile pf) throws AlreadyProcessingException {
         if (! pf.getIsDirectory()) {
             return;
         }
@@ -109,13 +110,13 @@ public class ModuleMetricsImplementation extends AbstractMetric {
         int mnof = 0;
         int mnol = 0;
         
-        List<ProjectFile> pfs = pf.getProjectVersion().getFiles(
+        List<IProjectFile> pfs = pf.getProjectVersion().getFiles(
                 Directory.getDirectory(pf.getFileName(), false), 
                 ProjectVersion.MASK_FILES);
         
         boolean foundSource = false; 
         FileTypeMatcher ftm = FileTypeMatcher.getInstance();
-        for (ProjectFile f : pfs) {
+        for (IProjectFile f : pfs) {
 
             if (ftm.getFileType(f.getName()) 
                     != FileTypeMatcher.FileType.SRC) {
@@ -223,7 +224,7 @@ public class ModuleMetricsImplementation extends AbstractMetric {
         }
     }
     
-    private int getMeasurement(String mnemonic, ProjectFile f) 
+    private int getMeasurement(String mnemonic, IProjectFile f) 
         throws AlreadyProcessingException {
         List<Metric> metric = new ArrayList<Metric>();
         AlitheiaPlugin plugin = core.getPluginAdmin().getImplementingPlugin(mnemonic);

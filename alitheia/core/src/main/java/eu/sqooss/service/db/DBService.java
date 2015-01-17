@@ -237,7 +237,7 @@ public interface DBService extends AlitheiaCoreService {
      * @param records the list of records to persist into the database
      * @return true if all the record insertions succeeded, false otherwise
      */
-    public <T extends DAObject> boolean addRecords(List<T> records);
+    public <T extends IDAObject> boolean addRecords(List<T> records);
 
     /**
      * Delete an existing record from the database.
@@ -267,7 +267,7 @@ public interface DBService extends AlitheiaCoreService {
      * @param obj the object to connect
      * @return the connected instance of the object
      */
-    public <T extends DAObject> T attachObjectToDBSession(T obj);
+    public <T extends IDAObject> T attachObjectToDBSession(T obj);
 
     /**
      * Execute a complete SQL query to the database.

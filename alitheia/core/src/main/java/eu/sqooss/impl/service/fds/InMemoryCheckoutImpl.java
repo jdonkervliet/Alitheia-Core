@@ -36,6 +36,7 @@ package eu.sqooss.impl.service.fds;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.ProjectFile;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.fds.InMemoryCheckout;
@@ -64,9 +65,9 @@ class InMemoryCheckoutImpl implements InMemoryCheckout {
     protected void createCheckout() {
         root = new InMemoryDirectory(this);
         
-        List<ProjectFile> projectFiles = revision.getFiles();
+        List<IProjectFile> projectFiles = revision.getFiles();
         if (projectFiles != null && projectFiles.size() != 0) {
-            for (ProjectFile f : projectFiles) {
+            for (IProjectFile f : projectFiles) {
                 if (pattern.matcher(f.getFileName()).matches()) {
                     if (!f.getIsDirectory()) {
                         root.createSubDirectory(f.getDir().getPath()).addFile(f.getName());

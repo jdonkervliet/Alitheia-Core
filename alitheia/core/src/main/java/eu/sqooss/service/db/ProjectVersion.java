@@ -80,7 +80,7 @@ import eu.sqooss.core.AlitheiaCore;
 @XmlRootElement(name="version")
 @Entity
 @Table(name="PROJECT_VERSION")
-public class ProjectVersion extends DAObject {
+public class ProjectVersion extends DAObject implements Version{
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -91,9 +91,9 @@ public class ProjectVersion extends DAObject {
 	/**
      * The project to which this object relates
      */
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY, targetEntity=StoredProject.class)
 	@JoinColumn(name="STORED_PROJECT_ID")
-    private StoredProject project;
+    private Project project;
 
     /**
      * The SCM version identifier to which this object relates
@@ -138,8 +138,8 @@ public class ProjectVersion extends DAObject {
     /**
      * The files changed in this version
      */
-    @OneToMany(fetch=FetchType.LAZY, mappedBy="projectVersion", orphanRemoval=true, cascade=CascadeType.ALL)
-    private Set<ProjectFile> versionFiles;
+    @OneToMany(fetch=FetchType.LAZY, mappedBy="projectVersion", orphanRemoval=true, cascade=CascadeType.ALL, targetEntity=ProjectFile.class)
+    private Set<IProjectFile> versionFiles;
 
     /**
      * The set of known tags in this version of the project
@@ -200,7 +200,7 @@ public class ProjectVersion extends DAObject {
 		// Nothing to do
 	}
 
-	public ProjectVersion(StoredProject project) {
+	public ProjectVersion(Project project) {
 		this.project = project;
 	}
 
@@ -212,11 +212,11 @@ public class ProjectVersion extends DAObject {
 		this.id = id;
 	}
 
-	public StoredProject getProject() {
+	public Project getProject() {
 		return project;
 	}
 
-    public void setProject(StoredProject project) {
+    public void setProject(Project project) {
         this.project = project;
     }
 
@@ -284,15 +284,15 @@ public class ProjectVersion extends DAObject {
     /**
      * Returns the files that were changed in this revision
      */
-    public Set<ProjectFile> getVersionFiles() {
+    public Set<IProjectFile> getVersionFiles() {
     	if (versionFiles == null) {
-    		versionFiles = new HashSet<ProjectFile>();
+    		versionFiles = new HashSet<IProjectFile>();
     	}
     		
     	return versionFiles;
     }
     
-    public void setVersionFiles( Set<ProjectFile> versionFiles ) {
+    public void setVersionFiles( Set<IProjectFile> versionFiles ) {
         this.versionFiles = versionFiles;
     }
   
@@ -367,6 +367,7 @@ public class ProjectVersion extends DAObject {
      * @param p comparison version
      * @return true if this <= p, in terms of revision order
      */
+    // TODO: fix useless if (for most versions here)
     public boolean lte(ProjectVersion p) {
         if (p.getProject().getId() != p.getProject().getId())
             throw new IllegalArgumentException("Project " + p.getProject() + 
@@ -513,7 +514,7 @@ public class ProjectVersion extends DAObject {
      * @return ProjectVersion object corresponding to the revision,
      *         or null if there is none.
      */
-    public static ProjectVersion getVersionByRevision(StoredProject project, String revisionId) {
+    public static ProjectVersion getVersionByRevision(Project project, String revisionId) {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
    
         Map<String,Object> parameters = new HashMap<String,Object>();
@@ -546,7 +547,7 @@ public class ProjectVersion extends DAObject {
      *         or <code>null</code> if there is none.
      */
     public static ProjectVersion getVersionByTimestamp(
-            StoredProject project, long timestamp) {
+            Project project, long timestamp) {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
    
         Map<String,Object> parameters = new HashMap<String,Object>();
@@ -570,7 +571,7 @@ public class ProjectVersion extends DAObject {
      * @param sp Project to lookup
      * @return The oldest recorded project revision
      */
-    public static ProjectVersion getFirstProjectVersion(StoredProject sp) {
+    public static ProjectVersion getFirstProjectVersion(Project sp) {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
 
         Map<String,Object> parameterMap = new HashMap<String,Object>();
@@ -589,7 +590,7 @@ public class ProjectVersion extends DAObject {
      * @return The <code>ProjectVersion</code> DAO for the latest version,
      *   or <code>null</code> if not found
      */
-    public static ProjectVersion getLastProjectVersion(StoredProject sp) {
+    public static ProjectVersion getLastProjectVersion(Project sp) {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
 
         Map<String,Object> parameterMap = new HashMap<String,Object>();
@@ -612,7 +613,7 @@ public class ProjectVersion extends DAObject {
      * @param p Project to look for
      * @return Last version measured, or revision 0.
      */
-    public static ProjectVersion getLastMeasuredVersion(Metric m, StoredProject p) {
+    public static ProjectVersion getLastMeasuredVersion(Metric m, Project p) {
         String query = "select pv from ProjectVersionMeasurement pvm, ProjectVersion pv" +
            " where pvm.projectVersion = pv" +
            " and pvm.metric = :metric and pv.project = :project" +
@@ -653,7 +654,7 @@ public class ProjectVersion extends DAObject {
         parameters.put(parFileStatus, state);
         List<?> queryResult = dbs.doHQL(query, parameters);
         // Return the query's result (if found)
-        if(queryResult != null || queryResult.size() > 0)
+        if(queryResult != null && queryResult.size() > 0)
             return (Long) queryResult.get(0);
         // Default result
         return 0;
@@ -705,11 +706,11 @@ public class ProjectVersion extends DAObject {
 
 
     public String toString() {
-        return "ProjectVersion(\"" + this.project.getName() + "\",r" + this.revisionId +")";
+        return "ProjectVersion(\"" + this.project.toString() + "\",r" + this.revisionId +")";
     }
 
 
-    private List<ProjectFile> getVersionFiles(Directory d, int mask) {
+    private List<IProjectFile> getVersionFiles(Directory d, int mask) {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
 
         String paramDirectory = "paramDirectory";
@@ -762,7 +763,7 @@ public class ProjectVersion extends DAObject {
  	        params.put(paramIsDirectory, isDirectory);
  	    }
  	    
- 	    List<ProjectFile> projectFiles = (List<ProjectFile>) dbs.doHQL(q.toString(), params);
+ 	    List<IProjectFile> projectFiles = (List<IProjectFile>) dbs.doHQL(q.toString(), params);
 
  	    if (projectFiles == null) 
  	        return Collections.emptyList();
@@ -774,7 +775,7 @@ public class ProjectVersion extends DAObject {
     /**
      * Returns all files that are live in this version. 
      */
-    public List<ProjectFile> getFiles() {
+    public List<IProjectFile> getFiles() {
     	return getVersionFiles(null, ProjectVersion.MASK_ALL);
     }
 
@@ -789,7 +790,7 @@ public class ProjectVersion extends DAObject {
 	 * directories
 	 * @return List of files visible in that version (may be empty, not null)
 	 */
-	public List<ProjectFile> getFiles(Directory d, int mask) {
+	public List<IProjectFile> getFiles(Directory d, int mask) {
 	    return getVersionFiles(d, mask);
 	}
 	
@@ -801,7 +802,7 @@ public class ProjectVersion extends DAObject {
 	 * @param d Directory to list
 	 * @return List of files visible in that version (may be empty, not null)
 	 */
-	public List<ProjectFile> getFiles(Directory d) {
+	public List<IProjectFile> getFiles(Directory d) {
 	    return getFiles(d, ProjectVersion.MASK_ALL);
 	}
 	
@@ -816,7 +817,7 @@ public class ProjectVersion extends DAObject {
 	 *         specified pattern (may be empty, not null)
 	 * 
 	 */
-	public List<ProjectFile> getFiles(Pattern p) {
+	public List<IProjectFile> getFiles(Pattern p) {
         return getFiles(p, MASK_ALL);
 	}
 
@@ -835,11 +836,11 @@ public class ProjectVersion extends DAObject {
      *         specified pattern (may be empty, not null)
      *
      */
-    public List<ProjectFile> getFiles(Pattern p, int mask) {
-        List<ProjectFile> files = getVersionFiles(null, mask);
-        Set<ProjectFile> matchedFiles = new HashSet<ProjectFile>();
+    public List<IProjectFile> getFiles(Pattern p, int mask) {
+        List<IProjectFile> files = getVersionFiles(null, mask);
+        Set<IProjectFile> matchedFiles = new HashSet<IProjectFile>();
 
-        for ( ProjectFile pf : files ) {
+        for ( IProjectFile pf : files ) {
             Matcher m = p.matcher(pf.getFileName());
 
             if (m.find()) {
@@ -847,7 +848,7 @@ public class ProjectVersion extends DAObject {
             }
         }
 
-        return new ArrayList<ProjectFile>(matchedFiles);
+        return new ArrayList<IProjectFile>(matchedFiles);
     }
 	
 	 /**
@@ -857,7 +858,7 @@ public class ProjectVersion extends DAObject {
      * @return List of directories visible in that version (may be empty, 
      * not null)
      */
-    public List<ProjectFile> allDirs() {
+    public List<IProjectFile> allDirs() {
         return getVersionFiles(null, ProjectVersion.MASK_DIRECTORIES);
     }
     
@@ -868,7 +869,7 @@ public class ProjectVersion extends DAObject {
      * @return List of files visible in that version (may be empty, 
      * not null)
      */
-    public List<ProjectFile> allFiles() {
+    public List<IProjectFile> allFiles() {
     	return getVersionFiles(null, ProjectVersion.MASK_FILES);
     }
     
@@ -924,13 +925,13 @@ public class ProjectVersion extends DAObject {
     /**
      * Filter files that changed in a version by their path name
      */
-    public Set<ProjectFile> getVersionFiles(Pattern p) {
-        Set<ProjectFile> result = new HashSet<ProjectFile>();
-        Set<ProjectFile> files = getVersionFiles();
+    public Set<IProjectFile> getVersionFiles(Pattern p) {
+        Set<IProjectFile> result = new HashSet<IProjectFile>();
+        Set<IProjectFile> files = getVersionFiles();
 
-        Iterator<ProjectFile> it = files.iterator();
+        Iterator<IProjectFile> it = files.iterator();
         while (it.hasNext()) {
-            ProjectFile pf = it.next();
+            IProjectFile pf = it.next();
             Matcher m = p.matcher(pf.getFileName());
             if (m.matches())
                 result.add(pf);
@@ -956,6 +957,11 @@ public class ProjectVersion extends DAObject {
 		hash = 31 * hash + (null == revisionId ? 0 : revisionId.hashCode());
 		hash = 31 * hash + (null == project ? 0 : project.hashCode());
 		return hash;
+	}
+
+	@Override
+	public void clearParents() {
+		this.parents.clear();
 	}
 }
 

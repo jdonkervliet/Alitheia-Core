@@ -55,6 +55,7 @@ import eu.sqooss.service.cluster.ClusterNodeActionException;
 import eu.sqooss.service.cluster.ClusterNodeService;
 import eu.sqooss.service.db.ClusterNode;
 import eu.sqooss.service.db.DBService;
+import eu.sqooss.service.db.Project;
 import eu.sqooss.service.db.StoredProject;
 import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.updater.UpdaterService;
@@ -347,10 +348,10 @@ public class ClusterNodeServiceImpl extends HttpServlet implements ClusterNodeSe
          	          	 
              bcontent = new StringBuilder();
              dbs.startDBSession();
-             Set<StoredProject> assignments = ClusterNode.thisNode().getProjects();
+             Set<Project> assignments = ClusterNode.thisNode().getProjects();
              if ((assignments!=null) &&  (assignments.size()>0) ){
                  bcontent.append("\n");
-                 for (StoredProject sp : assignments) {                
+                 for (Project sp : assignments) {                
                      bcontent.append("<project id=\"" + sp.getId() + "\"");
                                           // check if project is currently being updated
                      // yes/no/unknown, (unknown means that this project is assigned to another clusternode instance)                    

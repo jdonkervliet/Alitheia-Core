@@ -48,10 +48,12 @@ import eu.sqooss.core.AlitheiaCore;
 import eu.sqooss.service.db.DAObject;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.Directory;
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.Metric;
 import eu.sqooss.service.db.ProjectFile;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.StoredProject;
+import eu.sqooss.service.db.Version;
 
 @Path("/api")
 public class StoredProjectResource {
@@ -84,7 +86,7 @@ public class StoredProjectResource {
 	@Path("/project/{id}/versions")
 	@GET
 	@Produces({"application/xml", "application/json"})
-	public List<ProjectVersion> getAllVersions(@PathParam("id") Long id) {
+	public List<Version> getAllVersions(@PathParam("id") Long id) {
 		StoredProject sp = DAObject.loadDAObyId(id, StoredProject.class);
 	
 		return sp.getProjectVersions();
@@ -141,7 +143,7 @@ public class StoredProjectResource {
 	@Path("/project/{id}/version/{vid}/files/")
     @GET
     @Produces({"application/xml", "application/json"})
-    public List<ProjectFile> getAllFiles(@PathParam("id") String prid,
+    public List<IProjectFile> getAllFiles(@PathParam("id") String prid,
             @PathParam("vid") String verid) {
         
 	    ProjectVersion pv = getVersion(prid, verid);
@@ -154,7 +156,7 @@ public class StoredProjectResource {
 	@Path("/project/{id}/version/{vid}/files/{dir: .+}")
     @GET
     @Produces({"application/xml", "application/json"})
-    public List<ProjectFile> getFilesInDir(@PathParam("id") String prid,
+    public List<IProjectFile> getFilesInDir(@PathParam("id") String prid,
             @PathParam("vid") String verid,
             @PathParam("dir") String path) {
         
@@ -172,7 +174,7 @@ public class StoredProjectResource {
 	@Path("/project/{id}/version/{vid}/files/changed")
     @GET
     @Produces({"application/xml", "application/json"})
-    public Set<ProjectFile> getChangedFiles(@PathParam("id") String prid,
+    public Set<IProjectFile> getChangedFiles(@PathParam("id") String prid,
             @PathParam("vid") String verid) {
         
         ProjectVersion pv = getVersion(prid, verid);
@@ -185,7 +187,7 @@ public class StoredProjectResource {
 	@Path("/project/{id}/version/{vid}/dirs/")
     @GET
     @Produces({"application/xml", "application/json"})
-    public List<ProjectFile> getDirs(@PathParam("id") String prid,
+    public List<IProjectFile> getDirs(@PathParam("id") String prid,
             @PathParam("vid") String verid) {
         
 	    ProjectVersion pv = getVersion(prid, verid);
@@ -199,7 +201,7 @@ public class StoredProjectResource {
 	@Path("/project/{id}/version/{vid}/dirs/{dir: .+}")
     @GET
     @Produces({"application/xml", "application/json"})
-    public List<ProjectFile> getDirs(@PathParam("id") String prid,
+    public List<IProjectFile> getDirs(@PathParam("id") String prid,
             @PathParam("vid") String verid,
             @PathParam("dir") String path) {
         

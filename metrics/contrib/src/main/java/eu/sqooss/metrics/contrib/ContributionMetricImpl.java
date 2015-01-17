@@ -67,16 +67,19 @@ import eu.sqooss.service.db.BugResolution;
 import eu.sqooss.service.db.DAObject;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.Developer;
+import eu.sqooss.service.db.IDAObject;
+import eu.sqooss.service.db.IDeveloper;
+import eu.sqooss.service.db.IMailMessage;
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.MailMessage;
 import eu.sqooss.service.db.MailingList;
 import eu.sqooss.service.db.MailingListThread;
 import eu.sqooss.service.db.Metric;
 import eu.sqooss.service.db.MetricType;
+import eu.sqooss.service.db.MetricType.Type;
 import eu.sqooss.service.db.PluginConfiguration;
-import eu.sqooss.service.db.ProjectFile;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.StoredProject;
-import eu.sqooss.service.db.MetricType.Type;
 import eu.sqooss.service.fds.FileTypeMatcher;
 import eu.sqooss.service.metricactivator.MetricActivationException;
 import eu.sqooss.service.pa.PluginInfo;
@@ -150,13 +153,13 @@ public class ContributionMetricImpl extends AbstractMetric {
         return result;
     }
 
-    private boolean cleanupResource (Collection<? extends DAObject> c, 
+    private boolean cleanupResource (Collection<? extends IDAObject> c, 
             ActionCategory ac) {
         
         Map<String,Object> params = new HashMap<String,Object>();
         boolean result = false;
         
-        for(DAObject o : c) {
+        for(IDAObject o : c) {
             params.put("changedResourceId", o.getId());
             params.put("actionCategory", ac.toString());
             List<ContribAction> pas = 
@@ -229,7 +232,7 @@ public class ContributionMetricImpl extends AbstractMetric {
         return res;
     }
 
-    private ContribAction getResult(DAObject o) {
+    private ContribAction getResult(IDAObject o) {
         String paramChResource = "paramChResource";
         String paramActionCategory = "paramActionCategory";
         
@@ -298,15 +301,15 @@ public class ContributionMetricImpl extends AbstractMetric {
         if (b.getResolution().equals(BugResolution.Resolution.DUPLICATE))
             updateField(b, b.getReporter(), ActionType.BDUP, true, 1);
         
-        for(BugReportMessage brm : b.getReportMessages()) {
+        for(BugReportMessage brm : BugReportMessage.getAllReportMessageForBug(b)) {
             updateField(b, brm.getReporter(), ActionType.BCC, true, 1);
         }
     }
 
     public void run(MailingListThread t) throws AlreadyProcessingException {
         Metric contrib = Metric.getMetricByMnemonic(METRIC_CONTRIB);
-        List<MailMessage> emails = t.getMessagesByArrivalOrder();
-        MailMessage lastProcessed = null;
+        List<IMailMessage> emails = t.getMessagesByArrivalOrder();
+        IMailMessage lastProcessed = null;
         
         //Find the last email in this thread
         //that has been processed in a previous invocation. Avoid 
@@ -320,7 +323,7 @@ public class ContributionMetricImpl extends AbstractMetric {
             }
         }
         
-        for (MailMessage mm : emails) {
+        for (IMailMessage mm : emails) {
             ContribAction ca = getResult(mm);
             if (ca!= null) {
                 //This mail has been processed again, check if the
@@ -343,7 +346,7 @@ public class ContributionMetricImpl extends AbstractMetric {
             } else {
                 if (mm.getDepth() == 1) {
                   //First reply to a thread
-                    MailMessage firstMessage = t.getMessagesAtLevel(1).get(0);
+                    IMailMessage firstMessage = t.getMessagesAtLevel(1).get(0);
                     if (firstMessage.equals(mm))
                         updateField(mm, mm.getSender(), ActionType.MFR, true, 1);
                 }
@@ -362,7 +365,7 @@ public class ContributionMetricImpl extends AbstractMetric {
         /* Read config options in advance*/        
         FileTypeMatcher.FileType fType;
         Developer dev = pv.getCommitter();
-        Set<ProjectFile> projectFiles = pv.getVersionFiles();
+        Set<IProjectFile> projectFiles = pv.getVersionFiles();
         List<Metric> locMetric = new ArrayList<Metric>();
         AlitheiaPlugin plugin = AlitheiaCore.getInstance().getPluginAdmin().getImplementingPlugin("Wc.loc");
         
@@ -418,10 +421,10 @@ public class ContributionMetricImpl extends AbstractMetric {
         }
 
         FileTypeMatcher ftm = FileTypeMatcher.getInstance();
-        Iterator<ProjectFile> i = projectFiles.iterator();
+        Iterator<IProjectFile> i = projectFiles.iterator();
         
         while (i.hasNext()) {
-            ProjectFile pf = i.next();
+        	IProjectFile pf = i.next();
             
             if (pf.getIsDirectory()) {
                 //New directory added
@@ -459,7 +462,7 @@ public class ContributionMetricImpl extends AbstractMetric {
                         		getLOCResult(pf, plugin, locMetric));
                     } else {
                         //Existing file, get lines of previous version
-                        ProjectFile prevFile = pf.getPreviousFileVersion();
+                    	IProjectFile prevFile = pf.getPreviousFileVersion();
                         
                         if (prevFile == null) {
                         	warn("Could not find previous version", pf);
@@ -530,7 +533,7 @@ public class ContributionMetricImpl extends AbstractMetric {
         }
     }
 
-    private int getLOCResult(ProjectFile pf, AlitheiaPlugin plugin, 
+    private int getLOCResult(IProjectFile pf, AlitheiaPlugin plugin, 
             List<Metric> locMetric) 
         throws MetricMismatchException, AlreadyProcessingException, Exception {
       //Get lines of current version of the file from the wc metric
@@ -546,7 +549,7 @@ public class ContributionMetricImpl extends AbstractMetric {
         }
     }
     
-    private void updateField(DAObject o, Developer dev, 
+    private void updateField(IDAObject o, IDeveloper dev, 
             ActionType actionType, boolean isPositive, int value) {
         DBService db = AlitheiaCore.getInstance().getDBService();
         ContribActionType at = ContribActionType.getContribActionType(actionType,
@@ -583,22 +586,22 @@ public class ContributionMetricImpl extends AbstractMetric {
         }
     }
    
-    private void err(String msg, DAObject o) {
+    private void err(String msg, IDAObject o) {
     	log.error("Contrib (" + o.getClass() + "): Object: " + o.toString() 
     			+ " Error:"+ msg);
     }
     
-    private void warn(String msg, DAObject o) {
+    private void warn(String msg, IDAObject o) {
     	log.warn("Contrib (" + o.getClass() + "): Object: " + o.toString() 
     			+ " Warning:" + msg);
     }
     
-    private void info(String msg, DAObject o) {
+    private void info(String msg, IDAObject o) {
     	log.info("Contrib (" + o.getClass() + "): Object: " + o.toString() 
     			+ " Info:" + msg);
     }
     
-    private void debug(String msg, DAObject o) {
+    private void debug(String msg, IDAObject o) {
     	log.debug("Contrib (" + o.getClass() + "): Object: " + o.toString() 
     			+ " Debug:" + msg);
     }

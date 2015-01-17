@@ -1,0 +1,24 @@
+<html>
+ <head></head>
+ <body>
+  <form id="projects" name="projects" method="post" action="/projects"> 
+   <fieldset> 
+    <legend> Delete project: </legend> 
+    <table class="borderless"> 
+     <tbody>
+      <tr> 
+       <td class="borderless"> <b> Are you sure that you want to completely remove this project? </b> </td> 
+      </tr> 
+      <tr> 
+       <td class="borderless"> <input type="button" class="install" style="width:100px;" value="Yes" onclick="javascript:document.getElementById('reqAction').value='conRemProject';document.projects.submit();"> <input type="button" class="install" style="width:100px;" value="Cancel" onclick="javascript:document.projects.submit();"> </td> 
+      </tr> 
+     </tbody>
+    </table> 
+   </fieldset> 
+   <input type="hidden" id="reqAction" name="reqAction" value=""> 
+   <input type="hidden" id="projectId" name="projectId" value=""> 
+   <input type="hidden" id="reqParSyncPlugin" name="reqParSyncPlugin" value=""> 
+  </form> 
+ </body>
+</html>
+

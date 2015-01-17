@@ -43,8 +43,9 @@ import eu.sqooss.service.abstractmetric.AlreadyProcessingException;
 import eu.sqooss.service.abstractmetric.MetricDecl;
 import eu.sqooss.service.abstractmetric.MetricDeclarations;
 import eu.sqooss.service.abstractmetric.Result;
-import eu.sqooss.service.db.DAObject;
 import eu.sqooss.service.db.Directory;
+import eu.sqooss.service.db.IDAObject;
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.Metric;
 import eu.sqooss.service.db.ProjectDirectory;
 import eu.sqooss.service.db.ProjectFile;
@@ -113,7 +114,7 @@ public class Mi extends AbstractMetric {
             return;
 
         /* We now know that we are working with a dir*/
-        List<ProjectFile> fileList = pf.getProjectVersion().getFiles(
+        List<IProjectFile> fileList = pf.getProjectVersion().getFiles(
                 Directory.getDirectory(pf.getFileName(), false), 
                 ProjectVersion.MASK_FILES);
         
@@ -134,7 +135,7 @@ public class Mi extends AbstractMetric {
         int totalLoCom = 0, totalG = 0, totalLoC = 0;
         FileTypeMatcher ftm = FileTypeMatcher.getInstance();
         
-        for (ProjectFile f : fileList) {
+        for (IProjectFile f : fileList) {
                         
             if (f.getIsDirectory() || !ftm.isSourceFile(f.getFileName()))
                 continue;
@@ -303,7 +304,7 @@ public class Mi extends AbstractMetric {
      * @return The metric result or null if no result is in the database.
      */
     private <E extends Number> E getResult(AlitheiaPlugin plugin, Metric m, 
-            DAObject c, Class<E> resultType) {
+            IDAObject c, Class<E> resultType) {
         
         if (plugin == null) {
             log.error("Could not find the " + m.getMnemonic() 

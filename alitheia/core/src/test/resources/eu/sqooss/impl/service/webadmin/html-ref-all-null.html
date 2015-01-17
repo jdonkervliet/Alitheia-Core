@@ -1,0 +1,42 @@
+<html>
+ <head></head>
+ <body>
+  <form id="projects" name="projects" method="post" action="/projects"> 
+   <table> 
+    <thead> 
+     <tr class="head"> 
+      <td class="head" style="width:10%;"> Project Id </td> 
+      <td class="head" style="width:35%;"> Project Name </td> 
+      <td class="head" style="width:15%;"> Last Version </td> 
+      <td class="head" style="width:15%;"> Last Email </td> 
+      <td class="head" style="width:15%;"> Last Bug </td> 
+      <td class="head" style="width:10%;"> Evaluated </td> 
+      <td class="head" style="width:10%;"> Host </td> 
+     </tr> 
+    </thead> 
+    <tbody>
+     <tr>
+      <td colspan="6" class="noattr"> No projects found. </td> 
+     </tr>
+     <tr class="subhead"> 
+      <td>View</td> 
+      <td colspan="6"> <input type="button" class="install" style="width:100px;" value="Refresh" onclick="javascript:window.location='/projects';"> </td> 
+     </tr> 
+     <tr class="subhead"> 
+      <td>Manage</td> 
+      <td colspan="6"> <input type="button" class="install" style="width:100px;" value="Add project" onclick="javascript:document.getElementById('reqAction').value='reqAddProject';document.projects.submit();"> <input type="button" class="install" style="width:100px;" value="Delete project" onclick="javascript:document.getElementById('reqAction').value='reqRemProject';document.projects.submit();" disabled> </td> 
+     </tr> 
+     <tr class="subhead"> 
+      <td>Update</td> 
+      <td colspan="4"> <input type="button" class="install" value="Run Updater" onclick="javascript:document.getElementById('reqAction').value='conUpdate';document.projects.submit();" disabled> <input type="button" class="install" value="Run All Updaters" onclick="javascript:document.getElementById('reqAction').value='conUpdateAll';document.projects.submit();" disabled> </td> 
+      <td colspan="2" align="right"> <input type="button" class="install" value="Update all on " onclick="javascript:document.getElementById('reqAction').value='conUpdateAllOnNode';document.projects.submit();"> </td> 
+     </tr> 
+    </tbody> 
+   </table> 
+   <input type="hidden" id="reqAction" name="reqAction" value=""> 
+   <input type="hidden" id="projectId" name="projectId" value=""> 
+   <input type="hidden" id="reqParSyncPlugin" name="reqParSyncPlugin" value=""> 
+  </form> 
+ </body>
+</html>
+

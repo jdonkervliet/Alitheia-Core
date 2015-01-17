@@ -62,7 +62,7 @@ import eu.sqooss.core.AlitheiaCore;
 @XmlRootElement(name="config-option")
 @Entity
 @Table(name="CONFIG_OPTION")
-public class ConfigurationOption extends DAObject {
+public class ConfigurationOption extends DAObject implements IConfigurationOption{
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -129,7 +129,7 @@ public class ConfigurationOption extends DAObject {
      *  the method determines whether to overwrite the value or append the
      *  provided value to the existing list of values.
      */
-	public void setValues(StoredProject sp, List<String> values,
+	public void setValues(Project sp, List<String> values,
 			boolean overwrite) {
 		DBService dbs = AlitheiaCore.getInstance().getDBService();
 		
@@ -180,7 +180,7 @@ public class ConfigurationOption extends DAObject {
 	 * @return A list of configuration values that correspond to the provided
 	 * project
 	 */
-	public List<String> getValues(StoredProject sp) {
+	public List<String> getValues(Project sp) {
 		DBService dbs = AlitheiaCore.getInstance().getDBService();
 		
 		String paramProject = "paramProject";

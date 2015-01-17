@@ -46,12 +46,14 @@ import eu.sqooss.service.db.Branch;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.Developer;
 import eu.sqooss.service.db.Directory;
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.ProjectFile;
 import eu.sqooss.service.db.ProjectFileState;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.ProjectVersionParent;
 import eu.sqooss.service.db.StoredProject;
 import eu.sqooss.service.db.Tag;
+import eu.sqooss.service.db.Version;
 import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.tds.AccessorException;
 import eu.sqooss.service.tds.CommitCopyEntry;
@@ -464,7 +466,7 @@ public class GitUpdater implements MetadataUpdater {
                  * but something else. So we need to check on deletes
                  * whether this name was most recently a directory.
                  */
-                ProjectFile lastVersion = file.getPreviousFileVersion();
+                IProjectFile lastVersion = file.getPreviousFileVersion();
                 
                 /*
                  * If a directory is deleted and its previous incarnation cannot
@@ -475,7 +477,7 @@ public class GitUpdater implements MetadataUpdater {
                  */
                 boolean delAfterCopy = false;
                 if (lastVersion == null) {
-                    for (ProjectFile pf : curVersion.getVersionFiles()) {
+                    for (IProjectFile pf : curVersion.getVersionFiles()) {
                         if (pf.getFileName().equals(file.getFileName())
                                 && pf.getIsDirectory()
                                 && pf.isAdded()) {
@@ -507,10 +509,10 @@ public class GitUpdater implements MetadataUpdater {
         }
     }
     
-    private void replayLog(ProjectVersion curVersion) {
+    private void replayLog(Version curVersion) {
     	 /*Find duplicate projectfile entries*/
         HashMap<String, Integer> numOccurs = new HashMap<String, Integer>();
-        for (ProjectFile pf : curVersion.getVersionFiles()) {
+        for (IProjectFile pf : curVersion.getVersionFiles()) {
             if (numOccurs.get(pf.getFileName()) != null) {
                 numOccurs.put(pf.getFileName(), numOccurs.get(pf.getFileName()).intValue() + 1);
             } else {
@@ -521,7 +523,7 @@ public class GitUpdater implements MetadataUpdater {
         /* Copy list of files to be added to the DB in a tmp array,
          * to use for iterating
          */
-        List<ProjectFile> tmpFiles = new ArrayList<ProjectFile>();
+        List<IProjectFile> tmpFiles = new ArrayList<IProjectFile>();
         tmpFiles.addAll(curVersion.getVersionFiles());
         
         for (String fpath : numOccurs.keySet()) {
@@ -532,11 +534,11 @@ public class GitUpdater implements MetadataUpdater {
             
             int points = 0;
             
-            ProjectFile copyFrom = null;
-            ProjectFile winner = null; 
+            IProjectFile copyFrom = null;
+            IProjectFile winner = null; 
             //dbs.addRecord(pf);
 
-            for (ProjectFile f: tmpFiles) {
+            for (IProjectFile f: tmpFiles) {
                 
                 if (!f.getFileName().equals(fpath)) { 
                     continue;
@@ -571,7 +573,7 @@ public class GitUpdater implements MetadataUpdater {
 			 * locally versioned path. 
 			 */
             if (winner.getState().getStatus() == ProjectFileState.STATE_DELETED) {
-            	for (ProjectFile f: curVersion.getVersionFiles()) {
+            	for (IProjectFile f: curVersion.getVersionFiles()) {
             		if (!f.equals(winner) &&
             			 f.getFileName().startsWith(winner.getFileName()) &&
             			 f.getState().getStatus() != ProjectFileState.STATE_DELETED) {
@@ -601,7 +603,7 @@ public class GitUpdater implements MetadataUpdater {
      * revision, it returns the processed entry.
      */
     private ProjectFile addFile(ProjectVersion version, String fPath, 
-            ProjectFileState status, SCMNodeType t, ProjectFile copyFrom) {
+            ProjectFileState status, SCMNodeType t, IProjectFile copyFrom) {
         ProjectFile pf = new ProjectFile(version);
 
         String path = FileUtils.dirname(fPath);
@@ -701,13 +703,13 @@ public class GitUpdater implements MetadataUpdater {
     /**
      * Update the validUntil field after all files have been processed.
      */
-    private void updateValidUntil(ProjectVersion pv, Set<ProjectFile> versionFiles) {
+    private void updateValidUntil(ProjectVersion pv, Set<IProjectFile> versionFiles) {
 
         ProjectVersion previous = pv.getPreviousVersion();
 
-        for (ProjectFile pf : versionFiles) {
+        for (IProjectFile pf : versionFiles) {
             if (!pf.isAdded()) {
-                ProjectFile old = pf.getPreviousFileVersion();
+                IProjectFile old = pf.getPreviousFileVersion();
                 old.setValidUntil(previous);
             }
 
@@ -723,7 +725,7 @@ public class GitUpdater implements MetadataUpdater {
      * 
      * @param pf The project file representing the deleted directory
      */
-    private Set<ProjectFile> handleDirDeletion(final ProjectFile pf, final ProjectVersion pv) {
+    private Set<ProjectFile> handleDirDeletion(final IProjectFile pf, final ProjectVersion pv) {
     	Set<ProjectFile> files = new HashSet<ProjectFile>();
 
 		if (pf == null || pv == null) {
@@ -746,9 +748,9 @@ public class GitUpdater implements MetadataUpdater {
 
         ProjectVersion prev = pv.getPreviousVersion();
         
-        List<ProjectFile> dirFiles = prev.getFiles(d);
+        List<IProjectFile> dirFiles = prev.getFiles(d);
         
-        for (ProjectFile f : dirFiles) {
+        for (IProjectFile f : dirFiles) {
             if (f.getIsDirectory()) {
                 files.addAll(handleDirDeletion(f, pv));
             }
@@ -776,7 +778,7 @@ public class GitUpdater implements MetadataUpdater {
      * Handle directory copies
      */
     private void handleDirCopy(ProjectVersion pv, ProjectVersion fromVersion,
-            Directory from, Directory to, ProjectFile copyFrom) {
+            Directory from, Directory to, IProjectFile copyFrom) {
         
         if (!canProcessCopy(from.getPath(), to.getPath())) 
             return;
@@ -784,16 +786,16 @@ public class GitUpdater implements MetadataUpdater {
         addFile(pv, to.getPath(), ProjectFileState.added(), SCMNodeType.DIR, copyFrom);
         
         /*Recursively copy directories*/
-        List<ProjectFile> fromPF = fromVersion.getFiles(from, ProjectVersion.MASK_DIRECTORIES);
+        List<IProjectFile> fromPF = fromVersion.getFiles(from, ProjectVersion.MASK_DIRECTORIES);
         
-        for (ProjectFile f : fromPF) {
+        for (IProjectFile f : fromPF) {
             handleDirCopy(pv, fromVersion, Directory.getDirectory(f.getFileName(), false), 
             		Directory.getDirectory(to.getPath() + "/" + f.getName(), true), f);
         }
         
         fromPF = fromVersion.getFiles(from, ProjectVersion.MASK_FILES);
         
-        for (ProjectFile f : fromPF) {
+        for (IProjectFile f : fromPF) {
             addFile(pv, to.getPath() + "/" + f.getName(),
                     ProjectFileState.added(), SCMNodeType.FILE, f);
         }

@@ -74,12 +74,6 @@ public class MetricType extends DAObject {
 	@Column(name="type")
     private String type;
 
-    /**
-     * A list of all metrics of this type
-     */
-	@OneToMany(mappedBy="metricType", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Metric> metrics;
-
 	/**
 	 * An enumeration of all possible metric types. Metric types map to
 	 * activation types, but not necessarily on a 1-1 basis.
@@ -95,6 +89,7 @@ public class MetricType extends DAObject {
         DEVELOPER, NAMESPACE,
         EXECUNIT, ENCAPSUNIT;
 
+        //TODO: Misses StoredProject or "PROJECT" enum... This leads to 3 failing/erroring tests.
         public static Type fromString(String s) {
             if ("SOURCE_CODE".equals(s) || "SOURCE_FILE".equals(s))
                 return Type.SOURCE_FILE;
@@ -118,6 +113,8 @@ public class MetricType extends DAObject {
                 return Type.EXECUNIT;
             else if ("ENCAPSUNIT".equals(s))
                 return Type.ENCAPSUNIT;
+            else if ("PROJECT".equals(s) || "STOREDPROJECT".equals(s)) 
+            	return Type.PROJECT;
             else
                 return null;
         }
@@ -153,14 +150,6 @@ public class MetricType extends DAObject {
 
     public void setType(String s) {
         this.type = Type.fromString(s).toString();
-    }
-    
-    public Set<Metric> getMetrics() {
-        return metrics;
-    }
-
-    public void setMetrics(Set<Metric> metrics) {
-        this.metrics = metrics;
     }
 
     /**
@@ -215,32 +204,35 @@ public class MetricType extends DAObject {
 	}
 	
 	public Class<? extends DAObject> toActivator() {
-	    switch(Type.fromString(this.type)) {
-	        case SOURCE_DIRECTORY:
-	            return ProjectDirectory.class;
-	        case SOURCE_FILE:
-	            return ProjectFile.class;
-	        case PROJECT_VERSION:
-	            return ProjectVersion.class;
-	        case PROJECT:
-	            return StoredProject.class;
-	        case MAILMESSAGE:
-	            return MailMessage.class;
-	        case MAILING_LIST:
-	            return MailingList.class;
-	        case MAILTHREAD:
-	            return MailingListThread.class;
-	        case BUG:
-	            return Bug.class;
-	        case DEVELOPER:
-	        	return Developer.class;
-	        case NAMESPACE:
-	            return NameSpace.class;
-	        case ENCAPSUNIT:
-	            return EncapsulationUnit.class;
-	        case EXECUNIT:
-	            return ExecutionUnit.class;
-	    }
+		Type t = Type.fromString(this.type);
+		if (t != null) {
+		    switch(t) {
+		        case SOURCE_DIRECTORY:
+		            return ProjectDirectory.class;
+		        case SOURCE_FILE:
+		            return ProjectFile.class;
+		        case PROJECT_VERSION:
+		            return ProjectVersion.class;
+		        case PROJECT:
+		            return StoredProject.class;
+		        case MAILMESSAGE:
+		            return MailMessage.class;
+		        case MAILING_LIST:
+		            return MailingList.class;
+		        case MAILTHREAD:
+		            return MailingListThread.class;
+		        case BUG:
+		            return Bug.class;
+		        case DEVELOPER:
+		        	return Developer.class;
+		        case NAMESPACE:
+		            return NameSpace.class;
+		        case ENCAPSUNIT:
+		            return EncapsulationUnit.class;
+		        case EXECUNIT:
+		            return ExecutionUnit.class;
+		    }
+		}
 	    return null;
 	}
 }

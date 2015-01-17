@@ -73,8 +73,8 @@ public class ClusterNode extends DAObject {
     @XmlElement
     private String name;
 
-    @OneToMany(cascade = CascadeType.REFRESH, mappedBy="clusternode",  fetch = FetchType.LAZY)
-    private Set<StoredProject> projects;
+    @OneToMany(cascade = CascadeType.REFRESH, mappedBy="clusternode",  fetch = FetchType.LAZY, targetEntity=StoredProject.class)
+    private Set<Project> projects;
     
     // Nothing to do here
     public ClusterNode(){}
@@ -100,14 +100,15 @@ public class ClusterNode extends DAObject {
         this.id = id;
     }
     
-    public Set<StoredProject> getProjects() {
+    public Set<Project> getProjects() {
         return projects;
     }
 
-    public void setProjects(Set<StoredProject> projects) {
+    public void setProjects(Set<Project> projects) {
         this.projects = projects;
     }
     
+    // TODO: Fix method name
     public static ClusterNode getClusteNodeByName(String name) {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
         

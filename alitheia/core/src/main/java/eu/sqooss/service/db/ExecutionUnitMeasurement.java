@@ -34,9 +34,9 @@ public class ExecutionUnitMeasurement extends MetricMeasurement {
     /**
      * The encapsulation unit against which the measurement was made
      */ 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, targetEntity=ExecutionUnit.class)
     @JoinColumn(name = "EXECUTION_UNIT_ID", referencedColumnName = "EXECUTION_UNIT_ID")
-    private ExecutionUnit executionUnit;
+    private ExecUnit executionUnit;
     
     /**
      * The metric to which this result belongs
@@ -53,7 +53,7 @@ public class ExecutionUnitMeasurement extends MetricMeasurement {
 
     public ExecutionUnitMeasurement() {}
     
-    public ExecutionUnitMeasurement(ExecutionUnit eu, Metric m, String result) {
+    public ExecutionUnitMeasurement(ExecUnit eu, Metric m, String result) {
         this.executionUnit = eu;
         this.metric = m;
         this.result = result;
@@ -67,11 +67,11 @@ public class ExecutionUnitMeasurement extends MetricMeasurement {
         this.id = id;
     }
 
-    public ExecutionUnit getExecutionUnit() {
+    public ExecUnit getExecutionUnit() {
         return executionUnit;
     }
 
-    public void setExecutionUnit(ExecutionUnit executionUnit) {
+    public void setExecutionUnit(ExecUnit executionUnit) {
         this.executionUnit = executionUnit;
     }
 

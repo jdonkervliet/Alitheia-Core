@@ -69,10 +69,6 @@ public class BugSeverity extends DAObject {
 	@Column(name="severity")
     private String severity;
 	
-	/** Bugs with this severity*/
-	@OneToMany(mappedBy="severity", orphanRemoval=true)
-	private Set<Bug> bugs;
-
     public String getSeverity() {
         return severity;
     }
@@ -154,6 +150,7 @@ public class BugSeverity extends DAObject {
      * @return A Bugseverity DAO or null if an error occurred while creating
      * the severity code line to the database
      */
+    // TODO: Fix stupid naming issue
     public static BugSeverity getBugseverity(Severity s) {
         return getBugSeverity(s.toString(), true);
     }
@@ -198,12 +195,4 @@ public class BugSeverity extends DAObject {
         
         return bs;
     }
-
-	public void setBugs(Set<Bug> bugs) {
-		this.bugs = bugs;
-	}
-
-	public Set<Bug> getBugs() {
-		return bugs;
-	}
 }

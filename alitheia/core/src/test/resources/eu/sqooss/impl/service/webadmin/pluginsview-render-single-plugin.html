@@ -1,0 +1,37 @@
+<html>
+ <head></head> 
+ <body> 
+  <form id="metrics" name="metrics" method="post" action="/index"> 
+   <fieldset> 
+    <legend>All plug-ins</legend> 
+    <table> 
+     <thead> 
+      <tr class="head"> 
+       <td class="head" style="width: 80px;">Status</td> 
+       <td class="head" style="width: 30%;">Name</td> 
+       <td class="head" style="width: 40%;">Class</td> 
+       <td class="head">Version</td> 
+      </tr> 
+     </thead> 
+     <tbody> 
+      <tr class="edit" onclick="javascript:document.getElementById('pluginHashcode').value='null';document.metrics.submit();"> 
+       <td class="trans"><img src="/edit.png" alt="[Edit]" />&nbsp;Registered</td> 
+       <td class="trans">null</td> 
+       <td class="trans">null</td> 
+       <td class="trans">null</td> 
+      </tr> 
+     </tbody> 
+    </table> 
+    <span> <input type="checkbox" onclick="javascript:document.getElementById('showProperties').value = this.checked;document.getElementById('pluginHashcode').value='';document.metrics.submit();" />Display properties <input type="checkbox" onclick="javascript:document.getElementById('showActivators').value = this.checked;document.getElementById('pluginHashcode').value='';document.metrics.submit();" />Display activators </span> 
+   </fieldset> 
+   <input type="hidden" id="action" name="action" value="" /> 
+   <input type="hidden" id="pluginHashcode" name="pluginHashcode" value="" /> 
+   <input type="hidden" id="propertyName" name="propertyName" value="" /> 
+   <input type="hidden" id="propertyDescription" name="propertyDescription" value="" /> 
+   <input type="hidden" id="propertyType" name="propertyType" value="" /> 
+   <input type="hidden" id="propertyValue" name="propertyValue" value="" /> 
+   <input type="hidden" id="showProperties" name="showProperties" value="false" /> 
+   <input type="hidden" id="showActivators" name="showActivators" value="false" /> 
+  </form>  
+ </body>
+</html>

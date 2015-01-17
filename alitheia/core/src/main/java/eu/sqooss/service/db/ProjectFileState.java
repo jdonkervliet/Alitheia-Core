@@ -85,9 +85,6 @@ public class ProjectFileState extends DAObject {
     @XmlElement
     private int status;
     
-    @OneToMany(fetch = FetchType.LAZY, orphanRemoval=true, mappedBy="state")
-    private Set<ProjectFile> files;
-    
     public String toString() {
         switch (status) {
         case STATE_ADDED:
@@ -162,14 +159,6 @@ public class ProjectFileState extends DAObject {
 
     public void setStatus(int status) {
         this.status = status;
-    }
-
-    public Set<ProjectFile> getFiles() {
-        return files;
-    }
-
-    public void setFiles(Set<ProjectFile> files) {
-        this.files = files;
     }
 
 	public long getId() {

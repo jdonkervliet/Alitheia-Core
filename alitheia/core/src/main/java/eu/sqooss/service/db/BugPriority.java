@@ -68,10 +68,7 @@ public class BugPriority extends DAObject {
 	@Column(name="PRIORITY")
     private String priority;
 
-	/**Bugs with this priority*/
-	@OneToMany(mappedBy="priority", orphanRemoval=true)
-	private Set<Bug> bugs;
-	
+
     public String getPriority() {
         return priority;
     }
@@ -188,12 +185,4 @@ public class BugPriority extends DAObject {
         
         return bs;
     }
-
-	public void setBugs(Set<Bug> bugs) {
-		this.bugs = bugs;
-	}
-
-	public Set<Bug> getBugs() {
-		return bugs;
-	}
 }

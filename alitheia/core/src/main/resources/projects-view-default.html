@@ -1,0 +1,143 @@
+<table>
+  <thead>
+    <tr class="head">
+      <td class="head" style="width:10%;">
+        $default-table-header-1
+      </td>
+      <td class="head" style="width:35%;">
+        $default-table-header-2
+      </td>
+      <td class="head" style="width:15%;">
+        $default-table-header-3
+      </td>
+      <td class="head" style="width:15%;">
+        $default-table-header-4
+      </td>
+      <td class="head" style="width:15%;">
+        $default-table-header-5
+      </td>
+      <td class="head" style="width:10%;">
+        $default-table-header-6
+      </td>
+      <td class="head" style="width:10%;">
+        $default-table-header-7
+      </td>
+    </tr>
+  </thead>
+  #if ( $default-projects.isEmpty() )
+    <td colspan="6" class="noattr">
+      $default-no-projects-message
+    </td>
+  #else 
+    <tbody>
+    #foreach ( $project in $default-projects )
+      #if ( $selProject && ($project.getId() == $selProject.getId()) )
+        #set ( $selected = true )
+      #else
+        #set ( $selected = false)
+      #end
+      
+      #if ( $selected )
+        #set ( $class = "selected" )
+        #set ( $id = "" )  
+      #else
+        #set ( $class = "edit" )
+        #set ( $id = $project.getId() )
+      #end
+  
+      <tr class="$class" onclick="javascript:document.getElementById('$REQ_PAR_PROJECT_ID').value='$id';$SUBMIT">
+        <td class="trans">
+          $project.getId()
+        </td>
+        <td class="trans">
+          #if ( $selected )
+            <input type="button" class="install" style="width:100px;" value="$default-selected-button-value" onclick="javascript:document.getElementById('$REQ_PAR_ACTION').value='$ACT_REQ_SHOW_PROJECT';${SUBMIT}">
+          #else
+            <img src="/edit.png" alt="[Edit]">
+          #end
+          $!project.getName()
+        </td>
+        <td class="trans">
+          $default-last-version-message
+        </td>
+        <td class="trans">
+          $default-last-mail-message
+        </td>
+        <td class="trans">
+          $default-last-bug-entry
+        </td>
+        <td class="trans">
+          $default-evaluation-state
+        </td>
+        <td class="trans">
+          $default-cluster-node
+        </td>
+      </tr>
+      #foreach ( $metric in $default-installed-metrics )
+        <tr>
+          <td colspan="7" class="noattr">
+            <input type="button" class="install" style="width:100px;"
+            value="Synchronise"
+            onclick="javascript:document.getElementById('$REQ_PAR_SYNC_PLUGIN').value='$metric.getHashCode()';$SUBMIT">
+            $m.getPluginName()
+          </td>
+        </tr>
+      #end
+    #end
+  #end
+  <tr class="subhead">
+    <td>View</td>
+    <td colspan="6">
+      <input type="button" class="install" style="width:100px;" value="$toolbar-button-value" onclick="javascript:window.location='/projects${toolbar-button-window-location}';">
+    </td>
+  </tr>
+  <tr class="subhead">
+    <td>Manage</td>
+    <td colspan="6">
+      <input type="button" class="install" style="width:100px;"
+      value="$toolbar-act-req-add-button-value"
+      onclick="javascript:document.getElementById('$REQ_PAR_ACTION').value='$ACT_REQ_ADD_PROJECT';$SUBMIT">
+      <input type="button" class="install" style="width:100px;"
+      value="$toolbar-act-req-rem-button-value"
+      onclick="javascript:document.getElementById('$REQ_PAR_ACTION').value='$ACT_REQ_REM_PROJECT';$SUBMIT"$toolbar-button-disable>
+    </td>
+  </tr>
+  <tr class="subhead">
+    <td>Update</td>
+    <td colspan="4">
+      #if ( $selProject )
+        <select name="$REQ_PAR_UPD" id="$REQ_PAR_UPD" $toolbar-select-disable>
+          <optgroup label="Import Stage">
+          #foreach ( $u in $toolbar-updaters-import )
+            <option value="$!u.mnem()">$!u.descr()</option>
+          #end
+          </optgroup>
+          <optgroup label="Parse Stage">
+          #foreach ( $u in $toolbar-updaters-parse )
+            <option value="$!u.mnem()">$!u.descr()</option>
+          #end
+          </optgroup>
+          <optgroup label="Inference Stage">
+          #foreach ( $u in $toolbar-updaters-inference )
+            <option value="$!u.mnem()">$!u.descr()</option>
+          #end
+          </optgroup>
+          <optgroup label="Default">
+          #foreach ( $u in $toolbar-updaters-default )
+            <option value="$!u.mnem()">$!u.descr()</option>
+          #end
+          </optgroup>
+        </select>
+      #end
+      <input type="button" class="install" value="Run Updater"
+      onclick="javascript:document.getElementById('$REQ_PAR_ACTION').value='$ACT_CON_UPD';${SUBMIT}" $toolbar-button-disable>
+      <input type="button" class="install" value="Run All Updaters"
+                                           onclick="javascript:document.getElementById('$REQ_PAR_ACTION').value='$ACT_CON_UPD_ALL';${SUBMIT}"${toolbar-button-disable}>
+    </td>
+    <td colspan="2" align="right">
+      <input type="button" class="install" value="Update all on $!sobjClusterNode.getClusterNodeName()"
+                                           onclick="javascript:document.getElementById('$REQ_PAR_ACTION').value='$ACT_CON_UPD_ALL_NODE';$SUBMIT">
+    </td>
+  </tr>
+</tbody>
+</table>

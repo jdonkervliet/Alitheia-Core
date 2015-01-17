@@ -79,21 +79,21 @@ public class StoredProjectMeasurement extends MetricMeasurement {
 	/**
      * The StoredPRoject to which this measurement relates
      */
-	@ManyToOne(fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch=FetchType.LAZY, cascade = CascadeType.ALL, targetEntity=StoredProject.class)
 	@JoinColumn(name="STORED_PROJECT_ID", referencedColumnName="PROJECT_ID")
-    private StoredProject storedProject;
+    private Project storedProject;
 
     /**
      * @return the storedProject
      */
-    public StoredProject getStoredProject() {
+    public Project getStoredProject() {
         return storedProject;
     }
 
     /**
      * @param storedProject the storedProject to set
      */
-    public void setStoredProject(StoredProject storedProject) {
+    public void setStoredProject(Project storedProject) {
         this.storedProject = storedProject;
     }
     

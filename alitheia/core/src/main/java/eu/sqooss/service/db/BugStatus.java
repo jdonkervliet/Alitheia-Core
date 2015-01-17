@@ -68,10 +68,6 @@ public class BugStatus extends DAObject {
 	@Column(name="status")
     private String status;
 
-    /** Bugs with this status*/
-    @OneToMany(mappedBy="status", orphanRemoval=true)
-    private Set<Bug> bugs;
-    
     public String getStatus() {
         return status;
     }
@@ -196,12 +192,4 @@ public class BugStatus extends DAObject {
         
         return bs;
     }
-
-	public void setBugs(Set<Bug> bugs) {
-		this.bugs = bugs;
-	}
-
-	public Set<Bug> getBugs() {
-		return bugs;
-	}
 }

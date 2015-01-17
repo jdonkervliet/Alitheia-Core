@@ -42,7 +42,7 @@ import eu.sqooss.core.AlitheiaCore;
  * Base class for describing all DAO, providing a simple id interface
  */
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class DAObject {
+public abstract class DAObject implements IDAObject {
 
     /**
      * Returns the unique ID assigned to this instance

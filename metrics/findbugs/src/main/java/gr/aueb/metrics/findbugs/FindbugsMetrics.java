@@ -139,7 +139,7 @@ public class FindbugsMetrics extends AbstractMetric {
     //Run per version only
     public void run(ProjectFile pf){}
 
-    public List<Result> getResult(ProjectFile pf, Metric m) {
+    public List<Result> getResult(IProjectFile pf, Metric m) {
         return getResult(pf, ProjectFileMeasurement.class,
                 m, Result.ResultType.INTEGER);
     }
@@ -151,14 +151,14 @@ public class FindbugsMetrics extends AbstractMetric {
 
     public void run(ProjectVersion pv) {
 
-        List<ProjectFile> files = pv.getFiles();
+        List<IProjectFile> files = pv.getFiles();
         Pattern pom = Pattern.compile("pom.xml$");
         Pattern buildxml = Pattern.compile("build.xml$");
         Pattern trunk = Pattern.compile("/trunk");
         boolean foundTrunk = false, foundPom = false,
                 foundBuild = false, maven_build = true;
 
-        for(ProjectFile pf: files) {
+        for(IProjectFile pf: files) {
             if (pom.matcher(pf.getFileName()).find())
                 foundPom = true;
 
@@ -462,7 +462,7 @@ public class FindbugsMetrics extends AbstractMetric {
     }
 
     private void storeResults(Map <String, Map<String, Integer>> results,
-                              List<ProjectFile> files, ProjectVersion pv) {
+                              List<IProjectFile> files, ProjectVersion pv) {
         List<Metric> metrics = getAllSupportedMetrics();
         List<ProjectFileMeasurement> fileMeasurements = new ArrayList<ProjectFileMeasurement>();
         List<ProjectVersionMeasurement> versionMeasurements = new ArrayList<ProjectVersionMeasurement>();
@@ -476,7 +476,7 @@ public class FindbugsMetrics extends AbstractMetric {
             }
 
             for (String fileName: results.get(key).keySet()) {
-                ProjectFile file = findFile(files, fileName);
+            	IProjectFile file = findFile(files, fileName);
                 if (file == null) {
                     log.warn("Cannot find file path " + fileName + " in DB project files");
                     continue;
@@ -519,8 +519,8 @@ public class FindbugsMetrics extends AbstractMetric {
         return db.doHQL(q, parameters).size() > 0;
     }
 
-    private ProjectFile findFile(List<ProjectFile> files, String path) {
-        for(ProjectFile pf: files) {
+    private IProjectFile findFile(List<IProjectFile> files, String path) {
+        for(IProjectFile pf: files) {
             if (pf.getFileName().endsWith(path))
                 return pf;
         }

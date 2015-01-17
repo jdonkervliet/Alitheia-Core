@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.util.regex.Pattern;
 
 import eu.sqooss.core.AlitheiaCoreService;
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.ProjectFile;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.StoredProject;
@@ -161,7 +162,7 @@ public interface FDSService extends AlitheiaCoreService {
      * 
      * @return the file contents or null if none.
      */
-    InputStream getFileContents(ProjectFile pf);
+    InputStream getFileContents(IProjectFile pf);
 }
 
 // vi: ai nosi sw=4 ts=4 expandtab

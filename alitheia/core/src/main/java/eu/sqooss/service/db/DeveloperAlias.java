@@ -67,13 +67,13 @@ public class DeveloperAlias extends DAObject {
     private String email;
 	
 	@XmlElement
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch=FetchType.LAZY, targetEntity=Developer.class)
     @JoinColumn(name="DEVELOPER_ID")
-    private Developer developer;
+    private IDeveloper developer;
 
     public DeveloperAlias() {}
     
-    public DeveloperAlias(String email, Developer d) {
+    public DeveloperAlias(String email, IDeveloper d) {
         this.email = email; 
         this.developer = d;
     }
@@ -92,10 +92,10 @@ public class DeveloperAlias extends DAObject {
     public void setEmail(String email) {
         this.email = email;
     }
-    public Developer getDeveloper() {
+    public IDeveloper getDeveloper() {
         return developer;
     }
-    public void setDeveloper(Developer developer) {
+    public void setDeveloper(IDeveloper developer) {
         this.developer = developer;
     }
 
@@ -112,7 +112,7 @@ public class DeveloperAlias extends DAObject {
         if (!(other instanceof DeveloperAlias))
             return false;
         DeveloperAlias that = (DeveloperAlias) other;
-        return  (email.equals(that.email));
+        return  (email == null && that.email == null) || (email != null && email.equals(that.email));
     }
   
     @Override

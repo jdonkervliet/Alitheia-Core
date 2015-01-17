@@ -173,12 +173,12 @@ public class MetricsResource {
 	@Path("/metrics/by-type/{type}")
 	@GET
     @Produces({"application/xml", "application/json"})
-	public Set<Metric> getMetricByType(@PathParam("type") String type) {
+	public List<Metric> getMetricByType(@PathParam("type") String type) {
 		MetricType mt = MetricType.getMetricType(Type.fromString(type));
 		
 		if (mt == null) //No metric of this type has been installed yet
-		    return Collections.EMPTY_SET;
+		    return Collections.EMPTY_LIST;
 		
-		return mt.getMetrics();
+		return Metric.getMetricsByType(mt);
 	}
 }

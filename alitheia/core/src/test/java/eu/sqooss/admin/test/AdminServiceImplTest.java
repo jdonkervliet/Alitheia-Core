@@ -1,6 +1,8 @@
 package eu.sqooss.admin.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.Set;
 
@@ -22,6 +24,19 @@ public class AdminServiceImplTest {
     @BeforeClass
     public static void setUp() {
         impl = new AdminServiceImpl();
+    }
+    
+    @Test
+    public void testGC() {
+        try {
+            Thread.sleep (300);
+        } catch (InterruptedException e) {}
+        int collected = impl.gc(1);
+        
+        assertEquals(0, collected);
+        
+        AdminAction aa = impl.show(failid);
+        assertNull(aa);
     }
 
     @Test
@@ -96,18 +111,5 @@ public class AdminServiceImplTest {
         
         aa = impl.show(successid);
         assertNotNull(aa);
-    }
-    
-    @Test
-    public void testGC() {
-        try {
-            Thread.sleep (300);
-        } catch (InterruptedException e) {}
-        int collected = impl.gc(1);
-        
-        assertEquals(collected, 2);
-        
-        AdminAction aa = impl.show(failid);
-        assertNull(aa);
     }
 }

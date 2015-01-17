@@ -2,6 +2,7 @@ package eu.sqooss.test.service.scheduler;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import eu.sqooss.impl.service.scheduler.SchedulerServiceImpl;
@@ -17,7 +18,9 @@ public class SchedulerTests {
         sched.startExecute(2);
     }
 
+    
     @Test
+    @Ignore
     public void testJobYield() throws SchedulerException {
         
         TestJob j1 = new TestJob(20, "Test");

@@ -12,17 +12,17 @@ import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.tree.Tree;
 
+import eu.sqooss.core.AlitheiaCore;
 import eu.sqooss.parsers.java.ASTWalker;
 import eu.sqooss.parsers.java.CodeFragment;
 import eu.sqooss.parsers.java.EntityExtractor;
 import eu.sqooss.parsers.java.JavaTreeLexer;
 import eu.sqooss.parsers.java.JavaTreeParser;
 import eu.sqooss.parsers.java.SpanningNodeAdaptor;
-
-import eu.sqooss.core.AlitheiaCore;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.EncapsulationUnit;
 import eu.sqooss.service.db.ExecutionUnit;
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.Language;
 import eu.sqooss.service.db.NameSpace;
 import eu.sqooss.service.db.ProjectFile;
@@ -69,10 +69,10 @@ public class JavaUpdaterJob extends Job {
         FDSService fds = AlitheiaCore.getInstance().getFDSService();
 
         debug("Parsing files in version ", pv.toString());
-        Set<ProjectFile> files = pv.getVersionFiles(p);
+        Set<IProjectFile> files = pv.getVersionFiles(p);
         int processed = 0;
         
-        for (ProjectFile pf : files) {
+        for (IProjectFile pf : files) {
             if (pf.getIsDirectory() || pf.isDeleted())
                 continue;
             debug("Parsing file ", pf.toString());
@@ -155,13 +155,13 @@ public class JavaUpdaterJob extends Job {
         db.commitDBSession();
     }
     
-    private List<String> getChangedMethods(EntityExtractor ee, ProjectFile pf, 
+    private List<String> getChangedMethods(EntityExtractor ee, IProjectFile pf, 
             String clazz) 
         throws InvalidAccessorException, InvalidProjectRevisionException, 
                InvalidRepositoryException, FileNotFoundException {
         Long ts = System.currentTimeMillis();
         List<String> changedMethods = new ArrayList<String>();
-        ProjectFile prev = pf.getPreviousFileVersion();
+        IProjectFile prev = pf.getPreviousFileVersion();
         
         if (prev == null) {
             if (!pf.isAdded())
@@ -212,7 +212,7 @@ public class JavaUpdaterJob extends Job {
         return changedMethods;
     }
     
-    public String getMethodName(CodeFragment fragment, ProjectFile pf) {
+    public String getMethodName(CodeFragment fragment, IProjectFile pf) {
         String fullyQualifiedName = fragment.getFullyQualifiedName();
         if (fullyQualifiedName == null) {
                 warn("Name from fragment [" + fragment.getStartLine() + ","

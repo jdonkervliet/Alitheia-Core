@@ -61,7 +61,7 @@ import eu.sqooss.core.AlitheiaCore;
 @Entity
 @Table(name="MAILMESSAGE")
 @XmlRootElement(name="mlmsg")
-public class MailMessage extends DAObject {
+public class MailMessage extends DAObject implements IMailMessage{
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -78,9 +78,9 @@ public class MailMessage extends DAObject {
     /**
      * The list to which the email was originally sent
      */
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY, targetEntity=MailingList.class)
 	@JoinColumn(name="MLIST_ID")
-    private MailingList list;
+    private IMailingList list;
 
     /**
      * Unique ID for this message in the database
@@ -163,7 +163,7 @@ public class MailMessage extends DAObject {
         this.depth = depth;
     }
 
-    public Developer getSender() {
+    public IDeveloper getSender() {
         return sender;
     }
 
@@ -171,11 +171,11 @@ public class MailMessage extends DAObject {
         sender = value;
     }
 
-    public MailingList getList() {
+    public IMailingList getList() {
         return list;
     }
 
-    public void setList( MailingList value ) {
+    public void setList(IMailingList value ) {
         list = value;
     }
 
@@ -262,7 +262,7 @@ public class MailMessage extends DAObject {
     /**
      * Get the latest known mail message for the provided project, or null.  
      */
-    public static MailMessage getLatestMailMessage(StoredProject sp) {
+    public static MailMessage getLatestMailMessage(Project sp) {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
         String paramStoredProject = "paramStoredProject";
 

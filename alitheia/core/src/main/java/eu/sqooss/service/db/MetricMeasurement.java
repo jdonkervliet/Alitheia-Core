@@ -33,6 +33,18 @@
 
 package eu.sqooss.service.db;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
+import eu.sqooss.core.AlitheiaCore;
+
 /**
  * Instances of this class represent the result of a metric
  * calculation as stored in the database. This class is extended by
@@ -41,7 +53,19 @@ package eu.sqooss.service.db;
  */
 public abstract class MetricMeasurement extends DAObject {
 
+
     public abstract String getResult();
+    
+    public static List<MetricMeasurement> getMeasurementsForMetric(Class<? extends MetricMeasurement> clazz, Metric m) {
+    	DBService dbs = AlitheiaCore.getInstance().getDBService();
+    	String paramMetric = "paramMetric";
+    	String query = "SELECT mm FROM "+ clazz.getName() + " mm"
+    			+ " WHERE mm.metric = :" + paramMetric;
+    	
+    	Map<String, Object> params = new HashMap<String, Object>();
+    	params.put(paramMetric, m);
+    	return (List<MetricMeasurement>) dbs.doHQL(query, params);
+    }
 }
 
 // vi: ai nosi sw=4 ts=4 expandtab

@@ -1,0 +1,18 @@
+<fieldset>
+  <legend>
+    Project information
+  </legend>
+  <table class="borderless">
+      #foreach ( $row in $tableRows.keySet() )
+        #set ( $title = $row )
+        #set ( $value = $tableRows.get($title) )
+      <tr>
+        <td class="borderless" style="width:100px"><b>$!title</b></td>
+        <td class="borderless">$!value</td>
+      </tr>
+      #end
+    <tr>
+      <td colspan="2" class="borderless"><input type="button" class="install" style="width:100px" value="$toolbar_button_value" onclick="javascript:$toolbar_button_onclick"></td>
+    </tr>
+  </table>
+</fieldset>

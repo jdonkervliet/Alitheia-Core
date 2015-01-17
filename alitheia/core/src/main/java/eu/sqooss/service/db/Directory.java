@@ -85,8 +85,8 @@ public class Directory extends DAObject {
     /**
      * A set representing the files within this path
      */
-    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "dir")
-    private Set<ProjectFile> files;
+    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "dir", targetEntity=ProjectFile.class)
+    private Set<IProjectFile> files;
 
     public long getId() {
 		return id;
@@ -104,11 +104,11 @@ public class Directory extends DAObject {
         this.path = path;
     }    
     
-    public Set<ProjectFile> getFiles() {
+    public Set<IProjectFile> getFiles() {
         return files;
     }
 
-    public void setFiles(Set<ProjectFile> files) {
+    public void setFiles(Set<IProjectFile> files) {
         this.files = files;
     }
     
@@ -159,6 +159,7 @@ public class Directory extends DAObject {
         return this.path;
     }
     
+    //TODO: path != null is a weird check.
     public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

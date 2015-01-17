@@ -33,15 +33,26 @@
 
 package eu.sqooss.impl.service.metricactivator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 
-import eu.sqooss.service.abstractmetric.InvocationOrder;
 import org.osgi.framework.BundleContext;
 
 import eu.sqooss.core.AlitheiaCore;
 import eu.sqooss.service.abstractmetric.AbstractMetric;
 import eu.sqooss.service.abstractmetric.AlitheiaPlugin;
+import eu.sqooss.service.abstractmetric.InvocationOrder;
 import eu.sqooss.service.abstractmetric.SchedulerHints;
 import eu.sqooss.service.cluster.ClusterNodeActionException;
 import eu.sqooss.service.cluster.ClusterNodeService;
@@ -51,6 +62,7 @@ import eu.sqooss.service.db.DAObject;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.EncapsulationUnit;
 import eu.sqooss.service.db.ExecutionUnit;
+import eu.sqooss.service.db.IDAObject;
 import eu.sqooss.service.db.MailMessage;
 import eu.sqooss.service.db.MailingList;
 import eu.sqooss.service.db.MailingListThread;
@@ -89,8 +101,8 @@ public class MetricActivatorImpl  implements MetricActivator {
     public MetricActivatorImpl() { }
 
     @Override
-	public <T extends DAObject> void runMetric(T resource, AlitheiaPlugin ap) {
-    	Class<? extends DAObject> activator = resource.getClass();
+	public <T extends IDAObject> void runMetric(T resource, AlitheiaPlugin ap) {
+    	Class<? extends IDAObject> activator = resource.getClass();
     	Job j = new MetricActivatorJob((AbstractMetric)ap, resource.getId(), logger, 
     			metricTypesToActivators.get(activator),
     			priority.incrementAndGet(),

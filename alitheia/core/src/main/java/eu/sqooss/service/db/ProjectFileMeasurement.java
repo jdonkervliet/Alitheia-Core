@@ -77,9 +77,9 @@ public class ProjectFileMeasurement extends MetricMeasurement {
     /**
      * The file against which the measurement was made
      */ 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity=ProjectFile.class)
     @JoinColumn(name = "PROJECT_FILE_ID", referencedColumnName = "PROJECT_FILE_ID")
-    private ProjectFile projectFile;
+    private IProjectFile projectFile;
 
     public ProjectFileMeasurement() {
         // Nothing to do here
@@ -94,7 +94,7 @@ public class ProjectFileMeasurement extends MetricMeasurement {
      * @param f File this measurement is for
      * @param value (String) value representation of the measurement
      */
-    public ProjectFileMeasurement(Metric m, ProjectFile f, String value) {
+    public ProjectFileMeasurement(Metric m, IProjectFile f, String value) {
         super();
         setMetric(m);
         setProjectFile(f);
@@ -110,11 +110,11 @@ public class ProjectFileMeasurement extends MetricMeasurement {
     }
 
     
-    public ProjectFile getProjectFile() {
+    public IProjectFile getProjectFile() {
         return projectFile;
     }
 
-    public void setProjectFile(ProjectFile pf) {
+    public void setProjectFile(IProjectFile pf) {
         this.projectFile = pf;
     }
     

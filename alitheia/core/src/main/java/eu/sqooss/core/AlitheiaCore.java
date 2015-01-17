@@ -162,6 +162,10 @@ public class AlitheiaCore {
         return instance;
     }
     
+    public static void setTestInstance(AlitheiaCore instance) {
+    	AlitheiaCore.instance = instance;
+    }
+    
     /**
      * Register an external implementation of an AlitheiaCore service. It
      * will override any internally defined implementation.

@@ -43,6 +43,7 @@ import eu.sqooss.service.db.Plugin;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.StoredProject;
 import eu.sqooss.service.db.StoredProjectConfig;
+import eu.sqooss.service.db.Version;
 import eu.sqooss.service.scheduler.Job;
 
 public class ProjectDeleteJob extends Job {
@@ -91,14 +92,14 @@ public class ProjectDeleteJob extends Job {
         boolean success = true;
         
         // Delete project version's parents.
-        List<ProjectVersion> versions = sp.getProjectVersions();
+        List<Version> versions = sp.getProjectVersions();
         
-        for (ProjectVersion pv : versions) {
+        for (Version pv : versions) {
            /* Set<ProjectVersionParent> parents = pv.getParents();
             for (ProjectVersionParent pvp : parents) {
                 
             }*/
-            pv.getParents().clear();
+            pv.clearParents();
         }
                
         //Delete the project's config options

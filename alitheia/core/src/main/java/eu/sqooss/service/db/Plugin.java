@@ -59,7 +59,7 @@ import eu.sqooss.core.AlitheiaCore;
  */
 @Entity
 @Table(name="PLUGIN")
-public class Plugin extends DAObject {
+public class Plugin extends DAObject implements IPlugin {
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -188,6 +188,7 @@ public class Plugin extends DAObject {
         this.supportedMetrics = supportedMetrics;
     }
 
+    
     public static List<Plugin> getPluginByName(String name) {
         DBService db = AlitheiaCore.getInstance().getDBService();
         HashMap<String, Object> s = new HashMap<String, Object>();

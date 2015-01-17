@@ -65,17 +65,17 @@ public class NameSpace extends DAObject {
     String name;
 
     /** Version until this namespace instance is valid */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity=ProjectVersion.class)
     @JoinColumn(name = "CHANGE_VERSION_ID")
-    ProjectVersion changeVersion;
+    Version changeVersion;
 
     /** Encapsulation units, if any, */
-    @OneToMany(mappedBy = "namespace", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    Set<EncapsulationUnit> encapsulationUnits;
+    @OneToMany(mappedBy = "namespace", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, targetEntity=EncapsulationUnit.class)
+    Set<EncapsUnit> encapsulationUnits;
 
     /** Encapsulation units belonging to this namespace */
-    @OneToMany(mappedBy = "namespace", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    Set<ExecutionUnit> executionUnits;
+    @OneToMany(mappedBy = "namespace", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, targetEntity=ExecutionUnit.class)
+    Set<ExecUnit> executionUnits;
 
     /** The namespace language */
     @Enumerated(EnumType.STRING)
@@ -84,10 +84,6 @@ public class NameSpace extends DAObject {
     @Column(name = "LANG")
     Language lang;
 
-    /** Measurements for this namespace*/
-    @OneToMany(mappedBy = "namespace", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<NameSpaceMeasurement> measurements;
-    
     @Override
     public long getId() {
         return id;
@@ -106,31 +102,31 @@ public class NameSpace extends DAObject {
         this.name = name;
     }
 
-    public ProjectVersion getChangeVersion() {
+    public Version getChangeVersion() {
         return changeVersion;
     }
 
-    public void setChangeVersion(ProjectVersion changeVersion) {
+    public void setChangeVersion(Version changeVersion) {
         this.changeVersion = changeVersion;
     }
     
-    public Set<EncapsulationUnit> getEncapsulationUnits() {
+    public Set<EncapsUnit> getEncapsulationUnits() {
         if (encapsulationUnits == null)
-            encapsulationUnits = new HashSet<EncapsulationUnit>();
+            encapsulationUnits = new HashSet<EncapsUnit>();
         return encapsulationUnits;
     }
 
-    public void setEncapsulationUnits(Set<EncapsulationUnit> encapsulationUnits) {
+    public void setEncapsulationUnits(Set<EncapsUnit> encapsulationUnits) {
         this.encapsulationUnits = encapsulationUnits;
     }
 
-    public Set<ExecutionUnit> getExecutionUnits() {
+    public Set<ExecUnit> getExecutionUnits() {
         return executionUnits;
     }
 
-    public void setExecutionUnits(Set<ExecutionUnit> executionUnits) {
+    public void setExecutionUnits(Set<ExecUnit> executionUnits) {
         if (executionUnits == null)
-            executionUnits = new HashSet<ExecutionUnit>();
+            executionUnits = new HashSet<ExecUnit>();
         this.executionUnits = executionUnits;
     }
 
@@ -142,15 +138,7 @@ public class NameSpace extends DAObject {
         this.lang = lang;
     }
     
-    public void setMeasurements(Set<NameSpaceMeasurement> measurements) {
-        this.measurements = measurements;
-    }
-
-    public Set<NameSpaceMeasurement> getMeasurements() {
-        return measurements;
-    }
-    
-    public static NameSpace findByVersionName(ProjectVersion pv, String name) {
+    public static NameSpace findByVersionName(Version pv, String name) {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
         HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("pv", pv);

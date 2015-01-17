@@ -30,7 +30,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "encapsulation-unit")
 @Entity
 @Table(name = "ENCAPSULATION_UNIT")
-public class EncapsulationUnit extends DAObject {
+public class EncapsulationUnit extends DAObject implements EncapsUnit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -46,12 +46,12 @@ public class EncapsulationUnit extends DAObject {
     @JoinColumn(name = "NAMESPACE_ID")
     private NameSpace namespace;
 
-    @OneToMany(mappedBy = "encapsulationUnit", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<ExecutionUnit> execUnits;
+    @OneToMany(mappedBy = "encapsulationUnit", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, targetEntity=ExecutionUnit.class)
+    private Set<ExecUnit> execUnits;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity=ProjectFile.class)
     @JoinColumn(name = "PROJECT_FILE_ID")
-    private ProjectFile file;
+    private IProjectFile file;
     
     /**
      * Measurements for this encapsulation unit.
@@ -61,7 +61,7 @@ public class EncapsulationUnit extends DAObject {
 
     public EncapsulationUnit(){}
     
-    public EncapsulationUnit(ProjectFile pf){
+    public EncapsulationUnit(IProjectFile pf){
         this.file = pf;
     }
     
@@ -89,21 +89,21 @@ public class EncapsulationUnit extends DAObject {
         this.namespace = namespace;
     }
 
-    public Set<ExecutionUnit> getExecUnits() {
+    public Set<ExecUnit> getExecUnits() {
         if (execUnits == null)
-            return new HashSet<ExecutionUnit>();
+            return new HashSet<ExecUnit>();
         return execUnits;
     }
 
-    public void setExecUnits(Set<ExecutionUnit> execUnits) {
+    public void setExecUnits(Set<ExecUnit> execUnits) {
         this.execUnits = execUnits;
     }
 
-    public void setFile(ProjectFile file) {
+    public void setFile(IProjectFile file) {
         this.file = file;
     }
 
-    public ProjectFile getFile() {
+    public IProjectFile getFile() {
         return file;
     }
 

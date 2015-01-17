@@ -74,9 +74,9 @@ public class MailingListThread extends DAObject {
 	private long id;
 	
     /** The mailing list this thread belongs to */
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY, targetEntity=MailingList.class)
 	@JoinColumn(name="MAILING_LIST_ID", referencedColumnName = "MLIST_ID")
-    private MailingList list;
+    private IMailingList list;
 
     /** Flag to identify a thread as a flamewar */
 	@Column(name="IS_FLAME")
@@ -92,33 +92,30 @@ public class MailingListThread extends DAObject {
     /**
      * A set containing the messages that belong to this thread
      */
-	@OneToMany(mappedBy="thread", orphanRemoval=true)
-    private Set<MailMessage> messages;
+	@OneToMany(mappedBy="thread", orphanRemoval=true, targetEntity=MailMessage.class)
+    private Set<IMailMessage> messages;
    
-    @OneToMany(fetch=FetchType.LAZY, mappedBy="thread", cascade=CascadeType.ALL)
-    private Set<MailingListThreadMeasurement> measurements;
-	
-    public Set<MailMessage> getMessages() {
+    public Set<IMailMessage> getMessages() {
         return messages;
     }
 
-    public void setMessages(Set<MailMessage> messages) {
+    public void setMessages(Set<IMailMessage> messages) {
         this.messages = messages;
     }
 
     public MailingListThread() {}
     
-    public MailingListThread(MailingList l, Date d) {
+    public MailingListThread(IMailingList l, Date d) {
         this.list = l;
         this.isFlameWar = false;
         this.lastUpdated = d;
     }
 
-    public MailingList getList() {
+    public IMailingList getList() {
         return list;
     }
 
-    public void setList(MailingList list) {
+    public void setList(IMailingList list) {
         this.list = list;
     }
 
@@ -153,19 +150,28 @@ public class MailingListThread extends DAObject {
     /**
      * Get the email that kickstarted this thread.
      */
-    public MailMessage getStartingEmail() {
+    public IMailMessage getStartingEmail() {
 
         DBService dbs = AlitheiaCore.getInstance().getDBService();
 
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("thread", this);
-        params.put("depth", 0);
+
         
-        List<MailMessage> mm = dbs.findObjectsByProperties(MailMessage.class,
-                params);
+        String paramThread = "paramThread";
+        String paramDepth = "paramDepth";
+
+        String query = "select mm " +
+                " from MailMessage mm, MailingListThread mt " +
+                " where mm.thread = mt " +
+                " and mt = :" + paramThread + 
+                " and mm.depth = :" + paramDepth ;
+        params.put(paramThread, this);
+        params.put(paramDepth, 0);
+        
+        List<IMailMessage> mm = (List<IMailMessage>) dbs.doHQL(query, params, 1);
 
         if (!mm.isEmpty())
-            return mm.get(0);
+            return (IMailMessage) mm.get(0);
 
         return null;
     }
@@ -175,7 +181,7 @@ public class MailingListThread extends DAObject {
      * 
      * @return The last MailMessage in a thread.
      */
-    public List<MailMessage> getMessagesByArrivalOrder() {
+    public List<IMailMessage> getMessagesByArrivalOrder() {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
 
         String paramThread = "paramThread";
@@ -188,7 +194,7 @@ public class MailingListThread extends DAObject {
         Map<String,Object> params = new HashMap<String, Object>(1);
         params.put(paramThread, this);
         
-        List<MailMessage> mm = (List<MailMessage>) dbs.doHQL(query, params);
+        List<IMailMessage> mm = (List<IMailMessage>) dbs.doHQL(query, params);
         
         if (mm == null || mm.isEmpty())
             return Collections.emptyList();
@@ -225,7 +231,7 @@ public class MailingListThread extends DAObject {
      * @param level The thread depth level for which to select emails.
      * @return The emails at the specified thread depth.
      */
-    public List<MailMessage> getMessagesAtLevel(int level) {
+    public List<IMailMessage> getMessagesAtLevel(int level) {
         
         DBService dbs = AlitheiaCore.getInstance().getDBService();
 
@@ -243,19 +249,11 @@ public class MailingListThread extends DAObject {
         params.put(paramThread, this);
         params.put(paramDepth, level);
         
-        List<MailMessage> mm = (List<MailMessage>) dbs.doHQL(query, params);
+        List<IMailMessage> mm = (List<IMailMessage>) dbs.doHQL(query, params);
         
         if (mm == null || mm.isEmpty())
             return Collections.emptyList();
         
         return mm;
     }
-
-	public void setMeasurements(Set<MailingListThreadMeasurement> measurements) {
-		this.measurements = measurements;
-	}
-
-	public Set<MailingListThreadMeasurement> getMeasurements() {
-		return measurements;
-	}
 }

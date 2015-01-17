@@ -37,19 +37,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eu.sqooss.core.AlitheiaCore;
 import eu.sqooss.metrics.contrib.ContributionActions;
 import eu.sqooss.metrics.contrib.ContributionActions.ActionCategory;
 import eu.sqooss.metrics.contrib.ContributionActions.ActionType;
-import eu.sqooss.core.AlitheiaCore;
 import eu.sqooss.service.db.DAObject;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.Developer;
-import eu.sqooss.service.db.StoredProject;
+import eu.sqooss.service.db.IDeveloper;
+import eu.sqooss.service.db.Project;
 
 public class ContribAction extends DAObject {
 
     private long id;
-    private Developer developer;
+    private IDeveloper developer;
     private Long changedResourceId;
     private ContribActionType contribActionType;
     private long total;
@@ -71,11 +72,11 @@ public class ContribAction extends DAObject {
         this.changedResourceTimestamp = changedResourceTimestamp;
     }
 
-    public Developer getDeveloper() {
+    public IDeveloper getDeveloper() {
         return developer;
     }
 
-    public void setDeveloper(Developer developer) {
+    public void setDeveloper(IDeveloper developer) {
         this.developer = developer;
     }
     
@@ -103,7 +104,7 @@ public class ContribAction extends DAObject {
         this.total = total;
     }
 
-    public static ContribAction getContribAction(Developer dev, 
+    public static ContribAction getContribAction(IDeveloper dev, 
             Long resourceId, ContribActionType actionType) {
         
         DBService dbs = AlitheiaCore.getInstance().getDBService();
@@ -150,7 +151,7 @@ public class ContribAction extends DAObject {
         return 0L;
     }
     
-    public static Long getTotalActionsPerTypePerProject(StoredProject sp, 
+    public static Long getTotalActionsPerTypePerProject(Project sp, 
             Date timestamp, ContribActionType actionType) {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
 

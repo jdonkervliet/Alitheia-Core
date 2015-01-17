@@ -1,0 +1,20 @@
+<fieldset>
+  <legend>
+    ${req-rem-project-legend-label}: $!selProject.getName()
+  </legend>
+  <table class="borderless">
+    <tr>
+      <td class="borderless">
+        <b>
+          $req-rem-project-delete-project-message
+        </b>
+      </td>
+    </tr>
+    <tr>
+      <td class="borderless">
+        <input type="button" class="install" style="width:100px;" value="$req-rem-project-button-value" onclick="javascript:document.getElementById('$REQ_PAR_ACTION').value='$ACT_CON_REM_PROJECT';$!{SUBMIT}">
+        <input type="button" class="install" style="width:100px;" value="$req-rem-project-cancel-button-value" onclick="javascript:${SUBMIT}">
+      </td>
+    </tr>
+  </table>
+</fieldset>

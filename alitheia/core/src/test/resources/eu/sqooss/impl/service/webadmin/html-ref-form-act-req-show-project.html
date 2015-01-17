@@ -1,0 +1,45 @@
+<html>
+ <head></head>
+ <body>
+  <form id="projects" name="projects" method="post" action="/projects"> 
+   <fieldset> 
+    <legend> Project information </legend> 
+    <table class="borderless"> 
+     <tbody>
+      <tr> 
+       <td class="borderless" style="width:100px"><b>Homepage</b></td> 
+       <td class="borderless"></td> 
+      </tr> 
+      <tr> 
+       <td class="borderless" style="width:100px"><b>Project name</b></td> 
+       <td class="borderless"></td> 
+      </tr> 
+      <tr> 
+       <td class="borderless" style="width:100px"><b>Contact e-mail</b></td> 
+       <td class="borderless"></td> 
+      </tr> 
+      <tr> 
+       <td class="borderless" style="width:100px"><b>Source code</b></td> 
+       <td class="borderless"></td> 
+      </tr> 
+      <tr> 
+       <td class="borderless" style="width:100px"><b>Mailing list</b></td> 
+       <td class="borderless"></td> 
+      </tr> 
+      <tr> 
+       <td class="borderless" style="width:100px"><b>Bug database</b></td> 
+       <td class="borderless"></td> 
+      </tr> 
+      <tr> 
+       <td colspan="2" class="borderless"><input type="button" class="install" style="width:100px" value="Back" onclick="javascript:document.projects.submit();"></td> 
+      </tr> 
+     </tbody>
+    </table> 
+   </fieldset> 
+   <input type="hidden" id="reqAction" name="reqAction" value=""> 
+   <input type="hidden" id="projectId" name="projectId" value=""> 
+   <input type="hidden" id="reqParSyncPlugin" name="reqParSyncPlugin" value=""> 
+  </form> 
+ </body>
+</html>
+

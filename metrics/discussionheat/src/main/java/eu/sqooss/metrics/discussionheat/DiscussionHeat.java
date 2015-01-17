@@ -48,14 +48,15 @@ import eu.sqooss.service.abstractmetric.MetricDeclarations;
 import eu.sqooss.service.abstractmetric.MetricMismatchException;
 import eu.sqooss.service.abstractmetric.Result;
 import eu.sqooss.service.db.DBService;
+import eu.sqooss.service.db.IMailMessage;
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.MailMessage;
 import eu.sqooss.service.db.MailingListThread;
 import eu.sqooss.service.db.MailingListThreadMeasurement;
 import eu.sqooss.service.db.Metric;
-import eu.sqooss.service.db.ProjectFile;
+import eu.sqooss.service.db.Project;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.ProjectVersionMeasurement;
-import eu.sqooss.service.db.StoredProject;
 
 /**
  * Discussion heat plug-in. 
@@ -111,11 +112,12 @@ public class DiscussionHeat extends AbstractMetric {
         List<Long> mailsPerList = (List<Long>)db.doHQL(numMails, params);
         
         //Get one day's worth of messages
-        List<MailMessage> msgs = m.getMessagesByArrivalOrder();
-        List<MailMessage> oneDayMsgs = new ArrayList<MailMessage>();
-        int depth = 0; MailMessage first = null;
+        List<IMailMessage> msgs = m.getMessagesByArrivalOrder();
+        List<IMailMessage> oneDayMsgs = new ArrayList<IMailMessage>();
+        int depth = 0; 
+        IMailMessage first = null;
         
-        for (MailMessage msg : msgs) {
+        for (IMailMessage msg : msgs) {
             if (first != null) {
                 if (msg.getSendDate().getTime() - 
                         first.getSendDate().getTime() < (24L * 3600 * 1000)) {
@@ -215,7 +217,7 @@ public class DiscussionHeat extends AbstractMetric {
         return versions;
     }
     
-    private ProjectVersion getVersionByDate(Date ts, StoredProject sp) {
+    private ProjectVersion getVersionByDate(Date ts, Project sp) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("ts", ts.getTime());
         params.put("sp", sp);
@@ -256,7 +258,7 @@ public class DiscussionHeat extends AbstractMetric {
         int linesChanged = 0;
         try {
             // Get difference in number of lines for all file changes
-            for (ProjectFile pf : pv.getVersionFiles()) {
+            for (IProjectFile pf : pv.getVersionFiles()) {
                 if (pf.getIsDirectory())
                     continue;
                 if (pf.isDeleted()) {
@@ -286,7 +288,7 @@ public class DiscussionHeat extends AbstractMetric {
         dbs.addRecord(pvm);
     }
     
-    private int getLOCResult(ProjectFile pf, AlitheiaPlugin plugin, 
+    private int getLOCResult(IProjectFile pf, AlitheiaPlugin plugin, 
             List<Metric> locMetric) 
         throws MetricMismatchException, AlreadyProcessingException, Exception {
       //Get lines of current version of the file from the wc metric

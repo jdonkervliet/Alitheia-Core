@@ -7,6 +7,7 @@ import java.util.Map;
 import eu.sqooss.core.AlitheiaCore;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.Directory;
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.ProjectFile;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.StoredProject;
@@ -62,14 +63,14 @@ public class ModuleResolver implements MetadataUpdater {
             if (!db.isDBSessionActive()) db.startDBSession();
             pv = db.attachObjectToDBSession(pv);
             log.info("ModuleResolver: Processing version: " + pv);
-            for (ProjectFile pf : pv.allDirs()) {
+            for (IProjectFile pf : pv.allDirs()) {
 
-                List<ProjectFile> pfs = pf.getProjectVersion().getFiles(
+                List<IProjectFile> pfs = pf.getProjectVersion().getFiles(
                         Directory.getDirectory(pf.getFileName(), false),
                         ProjectVersion.MASK_FILES);
 
                 FileTypeMatcher ftm = FileTypeMatcher.getInstance();
-                for (ProjectFile f : pfs) {
+                for (IProjectFile f : pfs) {
 
                     if ((pf.isModule() == null || pf.isModule() == false) &&
                             ftm.getFileType(f.getName()) == FileTypeMatcher.FileType.SRC) {

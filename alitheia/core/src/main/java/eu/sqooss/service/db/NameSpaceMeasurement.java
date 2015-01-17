@@ -1,5 +1,9 @@
 package eu.sqooss.service.db;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +16,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import eu.sqooss.core.AlitheiaCore;
 
 /**
  * Instances of this class represent a measurement made against a
@@ -85,4 +91,14 @@ public class NameSpaceMeasurement extends MetricMeasurement {
     public NameSpace getNamespace() {
         return namespace;
     }
+    
+	public static List<NameSpaceMeasurement> getMeasurementsByNameSpace(NameSpace ns) {
+    	DBService dbs = AlitheiaCore.getInstance().getDBService();
+    	String paramNS = "paramNS";
+    	String query = "SELECT nsm FROM NameSpaceMeasurement nsm WHERE nsm.namespace = :" + paramNS;
+    	
+    	Map<String, Object> params = new HashMap<String, Object>();
+    	params.put(paramNS, ns);
+    	return (List<NameSpaceMeasurement>) dbs.doHQL(query, params);
+	}
 }

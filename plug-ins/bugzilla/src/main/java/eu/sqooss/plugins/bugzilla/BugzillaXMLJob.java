@@ -92,14 +92,13 @@ public class BugzillaXMLJob extends Job {
                     + " could not be parsed");
             return;
         }
-
+        Set<BugReportMessage> toadd = new LinkedHashSet<BugReportMessage>();
         // Filter out duplicate report messages
         if (bugExists(project, bugID)) {
             logger.debug(project.getName() + ": Updating existing bug "
                     + bugID);
-            List<BugReportMessage> msgs = bug.getAllReportComments();
-            Set<BugReportMessage> newmsgs = bug.getReportMessages();
-            Set<BugReportMessage> toadd = new LinkedHashSet<BugReportMessage>();
+            List<BugReportMessage> msgs = BugReportMessage.getAllReportMessageForBug(bug);
+            Set<BugReportMessage> newmsgs = getBugReportsFromBTSEntry(bts.getBug(bugID), bug);
 
             for (BugReportMessage newmsg : newmsgs) {
                 boolean found = false;
@@ -113,14 +112,31 @@ public class BugzillaXMLJob extends Job {
                     toadd.add(newmsg);
                 }
             }
-
-            bug.setReportMessages(toadd);
         }
 
         dbs.addRecord(bug);
+        for (BugReportMessage brm: toadd) {
+        	dbs.addRecord(brm);
+        }
         logger.debug(project.getName() + ": Added bug " + bugID);
         dbs.commitDBSession();
         
+    }
+    
+    private Set<BugReportMessage> getBugReportsFromBTSEntry(BTSEntry b, Bug bug) {
+        Set<BugReportMessage> commentList = new LinkedHashSet<BugReportMessage>();
+        
+        for (BTSEntryComment c : b.commentslist) {
+            BugReportMessage bugmessage = new BugReportMessage(bug);
+            bugmessage.setReporter(getDeveloper(c.commentAuthor));
+            bugmessage.setTimestamp(c.commentTS);
+            if (c.comment.length() > 255)
+                bugmessage.setText(c.comment.substring(0, 254));
+            else 
+                bugmessage.setText(c.comment);
+            commentList.add(bugmessage);
+        }
+        return commentList;
     }
     
     /**
@@ -165,20 +181,6 @@ public class BugzillaXMLJob extends Job {
         
         bug.setReporter(getDeveloper(b.reporter));
      
-        Set<BugReportMessage> commentList = new LinkedHashSet<BugReportMessage>();
-        
-        for (BTSEntryComment c : b.commentslist) {
-            BugReportMessage bugmessage = new BugReportMessage(bug);
-            bugmessage.setReporter(getDeveloper(c.commentAuthor));
-            bugmessage.setTimestamp(c.commentTS);
-            if (c.comment.length() > 255)
-                bugmessage.setText(c.comment.substring(0, 254));
-            else 
-                bugmessage.setText(c.comment);
-            commentList.add(bugmessage);
-        }
-        bug.setReportMessages(commentList);
-        
         return bug;
     }
     

@@ -64,7 +64,7 @@ import eu.sqooss.core.AlitheiaCore;
  */
 @Entity
 @Table(name="MAILINGLIST")
-public class MailingList extends DAObject {
+public class MailingList extends DAObject implements IMailingList{
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -80,9 +80,9 @@ public class MailingList extends DAObject {
     /**
      * The project to which this list is related
      */
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY, targetEntity=StoredProject.class)
 	@JoinColumn(name="PROJECT_ID")
-    private StoredProject storedProject;
+    private Project storedProject;
 
     /**
      * The set of available messages in this list
@@ -114,11 +114,11 @@ public class MailingList extends DAObject {
         this.listId = li;
     }
 
-    public StoredProject getStoredProject() {
+    public Project getStoredProject() {
         return storedProject;
     }
 
-    public void setStoredProject(StoredProject sp) {
+    public void setStoredProject(Project sp) {
         this.storedProject = sp;
     }
 

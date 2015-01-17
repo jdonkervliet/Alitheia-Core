@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import eu.sqooss.service.db.DAObject;
+import eu.sqooss.service.db.IDAObject;
 import eu.sqooss.service.db.Metric;
 
 @XmlRootElement(name="r")
@@ -33,7 +33,7 @@ public class Result {
 
     public Result() {}
     
-    public Result(DAObject o, Metric m, Object result, ResultType type) {
+    public Result(IDAObject o, Metric m, Object result, ResultType type) {
         this.artifactId = o.getId();
         this.metricId = m.getId();
         this.result = result;

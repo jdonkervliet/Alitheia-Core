@@ -37,9 +37,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -49,7 +47,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.OneToMany;
 import javax.xml.bind.annotation.XmlElement;
 
 import eu.sqooss.core.AlitheiaCore;
@@ -72,9 +69,9 @@ public class Bug extends DAObject {
 	private long id; 
 
 	/** The project this bug belongs to */
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY, targetEntity=StoredProject.class)
 	@JoinColumn(name="STORED_PROJECT_ID")
-    private StoredProject project;
+    private Project project;
     
     /** When this bug was last touched by the updater */
 	@Column(name="UPDATE_RUN")
@@ -124,10 +121,6 @@ public class Bug extends DAObject {
     @Column(name="SHORT_DESC")
     private String shortDesc;
     
-    /** The list of messages associated to this bug */
-    @OneToMany(mappedBy="bug", cascade=CascadeType.ALL, orphanRemoval=true)
-    private Set<BugReportMessage> reportMessages;
-
     public long getId() {
 		return id;
 	}
@@ -208,19 +201,11 @@ public class Bug extends DAObject {
         this.shortDesc = shortDesc;
     }
 
-    public Set<BugReportMessage> getReportMessages() {
-        return reportMessages;
-    }
-
-    public void setReportMessages(Set<BugReportMessage> reportMessages) {
-        this.reportMessages = reportMessages;
-    }
-
-    public StoredProject getProject() {
+    public Project getProject() {
         return project;
     }
 
-    public void setProject(StoredProject project) {
+    public void setProject(Project project) {
         this.project = project;
     }
 
@@ -236,7 +221,7 @@ public class Bug extends DAObject {
      * Get the latest entry processed by the bug updater
      */
     @SuppressWarnings("unchecked")
-    public static Bug getLastUpdate(StoredProject sp) {
+    public static Bug getLastUpdate(Project sp) {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
 
         if (sp == null)
@@ -262,34 +247,9 @@ public class Bug extends DAObject {
     }
     
     /**
-     * Get a list of all bug report comments for this specific bug,
-     * ordered by the time the comment was left (old to new).  
-     */
-    @SuppressWarnings("unchecked")
-    public List<BugReportMessage> getAllReportComments() {
-        DBService dbs = AlitheiaCore.getInstance().getDBService();
-        
-        String paramBugID = "paramBugID";
-        String paramStoredProject = "stroredProject";
-        
-        String query = "select brm " +
-        		"from Bug b, BugReportMessage brm " +
-        		"where brm.bug = b " +
-        		"and b.bugID = :" + paramBugID +
-        		" and b.project =:" + paramStoredProject +
-        		" order by brm.timestamp asc" ;
-        
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put(paramBugID, bugID);
-        params.put(paramStoredProject, project);
-        
-        return (List<BugReportMessage>) dbs.doHQL(query, params);
-    }
-    
-    /**
      * Get the latest entry for the bug with the provided Id.
      */
-    public static Bug getBug(String bugID, StoredProject sp) {    
+    public static Bug getBug(String bugID, Project sp) {    
         DBService dbs = AlitheiaCore.getInstance().getDBService();
         
         String paramBugID = "paramBugID";
@@ -298,8 +258,7 @@ public class Bug extends DAObject {
         String query = "select b " +
         	        "from Bug b " +
         	        "where b.bugID = :" + paramBugID + 
-        	        " and b.project = :" + paramStoredProject +
-        	        " order by b.timestamp desc";
+        	        " and b.project = :" + paramStoredProject ;
         
         Map<String, Object> params = new HashMap<String, Object>();
         params.put(paramBugID, bugID);
@@ -311,6 +270,66 @@ public class Bug extends DAObject {
             return null;
         else 
             return bug.get(0);
+    }
+    
+    /**
+     * Gets all bugs for a given priority.
+     * @param priority To filter the bugs by.
+     * @return the list of bugs of the given priority.
+     */
+    public static List<Bug> getBugsForPriority(BugPriority priority) {
+    	DBService dbs = AlitheiaCore.getInstance().getDBService();
+    	String paramBugPriority = "paramBugPriority";
+    	String query = "SELECT b FROM Bug b WHERE b.priority = :" + paramBugPriority;
+    	
+    	Map<String, Object> params = new HashMap<String, Object>();
+    	params.put(paramBugPriority, priority);
+    	return (List<Bug>) dbs.doHQL(query, params);
+    }
+    
+    /**
+     * Gets all bugs for a given resolution.
+     * @param resolution To filter the bugs by.
+     * @return the list of bugs of the given resolution.
+     */
+    public static List<Bug> getBugsForResolution(BugResolution resolution) {
+    	DBService dbs = AlitheiaCore.getInstance().getDBService();
+    	String paramBugResolution = "paramBugResolution";
+    	String query = "SELECT b FROM Bug b WHERE b.resolution = :" + paramBugResolution;
+    	
+    	Map<String, Object> params = new HashMap<String, Object>();
+    	params.put(paramBugResolution, resolution);
+    	return (List<Bug>) dbs.doHQL(query, params);
+    }
+    
+    /**
+     * Gets all bugs for a given severity.
+     * @param severity To filter the bugs by.
+     * @return the list of bugs of the given severity.
+     */
+    public static List<Bug> getBugsForSeverity(BugSeverity severity) {
+    	DBService dbs = AlitheiaCore.getInstance().getDBService();
+    	String paramBugSeverity = "paramBugSeverity";
+    	String query = "SELECT b FROM Bug b WHERE b.severity = :" + paramBugSeverity;
+    	
+    	Map<String, Object> params = new HashMap<String, Object>();
+    	params.put(paramBugSeverity, severity);
+    	return (List<Bug>) dbs.doHQL(query, params);
+    }
+    
+    /**
+     * Gets all bugs for a given status.
+     * @param status To filter the bugs by.
+     * @return the list of bugs of the given status.
+     */
+    public static List<Bug> getBugsForStatus(BugStatus status) {
+    	DBService dbs = AlitheiaCore.getInstance().getDBService();
+    	String paramBugStatus = "paramBugStatus";
+    	String query = "SELECT b FROM Bug b WHERE b.status = :" + paramBugStatus;
+    	
+    	Map<String, Object> params = new HashMap<String, Object>();
+    	params.put(paramBugStatus, status);
+    	return (List<Bug>) dbs.doHQL(query, params);
     }
 }
 

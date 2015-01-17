@@ -60,11 +60,13 @@ import eu.sqooss.service.db.DAObject;
 import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.EncapsulationUnitMeasurement;
 import eu.sqooss.service.db.ExecutionUnitMeasurement;
+import eu.sqooss.service.db.IDAObject;
 import eu.sqooss.service.db.MailMessageMeasurement;
 import eu.sqooss.service.db.MailingListThreadMeasurement;
 import eu.sqooss.service.db.Metric;
 import eu.sqooss.service.db.MetricMeasurement;
 import eu.sqooss.service.db.MetricType;
+import eu.sqooss.service.db.MetricType.Type;
 import eu.sqooss.service.db.NameSpaceMeasurement;
 import eu.sqooss.service.db.Plugin;
 import eu.sqooss.service.db.PluginConfiguration;
@@ -72,7 +74,6 @@ import eu.sqooss.service.db.ProjectFileMeasurement;
 import eu.sqooss.service.db.ProjectVersionMeasurement;
 import eu.sqooss.service.db.StoredProject;
 import eu.sqooss.service.db.StoredProjectMeasurement;
-import eu.sqooss.service.db.MetricType.Type;
 import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.metricactivator.MetricActivationException;
 import eu.sqooss.service.metricactivator.MetricActivator;
@@ -335,7 +336,7 @@ public abstract class AbstractMetric implements AlitheiaPlugin {
      *      not supported by this metric.
      */
      @SuppressWarnings("unchecked")
-     public List<Result> getResultIfAlreadyCalculated(DAObject o, List<Metric> l) throws MetricMismatchException {
+     public List<Result> getResultIfAlreadyCalculated(IDAObject o, List<Metric> l) throws MetricMismatchException {
         boolean found = false;        
         List<Result> result = new ArrayList<Result>();
         
@@ -403,7 +404,7 @@ public abstract class AbstractMetric implements AlitheiaPlugin {
      *      not supported by this metric.
      * @throws AlreadyProcessingException 
      */
-    public List<Result> getResult(DAObject o, List<Metric> l) 
+    public List<Result> getResult(IDAObject o, List<Metric> l) 
     throws MetricMismatchException, AlreadyProcessingException, Exception {
         List<Result> r = getResultIfAlreadyCalculated(o, l);
 
@@ -439,7 +440,7 @@ public abstract class AbstractMetric implements AlitheiaPlugin {
 
     private Map<Long,Pair<Object,Integer>> locks = new HashMap<Long,Pair<Object,Integer>>();
     
-    private Object lockObject(DAObject o) throws AlreadyProcessingException {
+    private Object lockObject(IDAObject o) throws AlreadyProcessingException {
     	synchronized (locks) {
             if (!locks.containsKey(o.getId())) {
                 locks.put(o.getId(), 
@@ -469,7 +470,7 @@ public abstract class AbstractMetric implements AlitheiaPlugin {
         }
     }
     
-    private void unlockObject(DAObject o) {
+    private void unlockObject(IDAObject o) {
     	synchronized(locks) {
     		Pair<Object,Integer> p = locks.get(o.getId());
     		p.second = p.second - 1;
@@ -492,7 +493,7 @@ public abstract class AbstractMetric implements AlitheiaPlugin {
      * @throws MetricMismatchException
      *                 if the DAO is of a type not supported by this metric.
      */
-    public void run(DAObject o) throws MetricMismatchException, 
+    public void run(IDAObject o) throws MetricMismatchException, 
         AlreadyProcessingException, Exception {
 
         if (!checkDependencies()) {
@@ -544,7 +545,7 @@ public abstract class AbstractMetric implements AlitheiaPlugin {
         return m;
     }
     
-    private void logErr(String method, DAObject o, Exception e) {
+    private void logErr(String method, IDAObject o, Exception e) {
         log.error("Plugin:" + this.getClass().toString() + 
                 "\nDAO id: " + o.getId() + 
                 "\nDAO class: " + o.getClass() +
@@ -842,7 +843,7 @@ public abstract class AbstractMetric implements AlitheiaPlugin {
     /**
      * Convenience method to get the measurement for a single metric.
      */
-    protected List<Result> getResult(DAObject o, Class<? extends MetricMeasurement> clazz, 
+    protected List<Result> getResult(IDAObject o, Class<? extends MetricMeasurement> clazz, 
             Metric m, Result.ResultType type) {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
         Map<String, Object> props = new HashMap<String, Object>();

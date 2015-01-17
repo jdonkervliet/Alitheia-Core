@@ -1,37 +1,49 @@
 package eu.sqooss.metrics.java;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import eu.sqooss.parsers.java.*;
-import eu.sqooss.service.fds.FDSService;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.tree.Tree;
 import org.osgi.framework.BundleContext;
 
 import eu.sqooss.core.AlitheiaCore;
+import eu.sqooss.parsers.java.ASTWalker;
+import eu.sqooss.parsers.java.CBOCalculator;
+import eu.sqooss.parsers.java.EntityExtractor;
+import eu.sqooss.parsers.java.InheritanceExtractor;
+import eu.sqooss.parsers.java.JavaTreeLexer;
+import eu.sqooss.parsers.java.JavaTreeParser;
+import eu.sqooss.parsers.java.LCOMCalculator;
+import eu.sqooss.parsers.java.McCabeCalculator;
+import eu.sqooss.parsers.java.SpanningNodeAdaptor;
 import eu.sqooss.service.abstractmetric.AbstractMetric;
 import eu.sqooss.service.abstractmetric.MetricDecl;
 import eu.sqooss.service.abstractmetric.MetricDeclarations;
 import eu.sqooss.service.abstractmetric.Result;
 import eu.sqooss.service.abstractmetric.SchedulerHints;
 import eu.sqooss.service.db.DBService;
+import eu.sqooss.service.db.EncapsUnit;
 import eu.sqooss.service.db.EncapsulationUnit;
 import eu.sqooss.service.db.EncapsulationUnitMeasurement;
+import eu.sqooss.service.db.ExecUnit;
 import eu.sqooss.service.db.ExecutionUnit;
 import eu.sqooss.service.db.ExecutionUnitMeasurement;
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.Metric;
 import eu.sqooss.service.db.ProjectFile;
 import eu.sqooss.service.db.ProjectVersion;
-import eu.sqooss.service.scheduler.Job;
-import eu.sqooss.service.scheduler.ResumePoint;
-import eu.sqooss.service.scheduler.Scheduler;
-import eu.sqooss.service.scheduler.SchedulerException;
+import eu.sqooss.service.fds.FDSService;
 
 @MetricDeclarations(metrics = {
   @MetricDecl(mnemonic = "MCCABE", activators = {ExecutionUnit.class, ProjectVersion.class}, descr = "McCabe Complexity Metric"),
@@ -47,7 +59,7 @@ import eu.sqooss.service.scheduler.SchedulerException;
 @SchedulerHints(activationOrder = {ProjectVersion.class, EncapsulationUnit.class})
 public class JavaMetrics extends AbstractMetric {
 
-    private List<ProjectFile> changedFiles;
+    private List<IProjectFile> changedFiles;
     private ProjectVersion pv;
     //Class -> Base 
     private ConcurrentMap<String, String> reducer;
@@ -90,9 +102,9 @@ public class JavaMetrics extends AbstractMetric {
         this.pv = pv;
 
         Pattern p = Pattern.compile("([^\\s]+(\\.(?i)(java))$)");
-        changedFiles = new ArrayList<ProjectFile>();
+        changedFiles = new ArrayList<IProjectFile>();
 
-        for (ProjectFile pf : pv.getVersionFiles()) {
+        for (IProjectFile pf : pv.getVersionFiles()) {
             Matcher m = p.matcher(pf.getName());
             if (m.matches())
                 changedFiles.add(pf);
@@ -105,7 +117,7 @@ public class JavaMetrics extends AbstractMetric {
         }
 
         reducer = new ConcurrentHashMap<String, String>();
-        for (ProjectFile pf : pv.getFiles(p))
+        for (IProjectFile pf : pv.getFiles(p))
         try {
             if(!db.isDBSessionActive()) db.startDBSession();
             parseFile(pf);
@@ -116,8 +128,8 @@ public class JavaMetrics extends AbstractMetric {
         }
 
 
-        List<EncapsulationUnit> changedClasses = new ArrayList<EncapsulationUnit>();
-        for (ProjectFile pf : changedFiles) {
+        List<EncapsUnit> changedClasses = new ArrayList<EncapsUnit>();
+        for (IProjectFile pf : changedFiles) {
             pf = db.attachObjectToDBSession(pf);
             changedClasses.addAll(pf.getEncapsulationUnits());
         }
@@ -125,7 +137,7 @@ public class JavaMetrics extends AbstractMetric {
         Metric DIT = Metric.getMetricByMnemonic("DIT");
         Metric NOC = Metric.getMetricByMnemonic("NOC");
 
-        for (EncapsulationUnit clazz : changedClasses) {
+        for (EncapsUnit clazz : changedClasses) {
             String classname = clazz.getName();
             String base = reducer.get(classname);
             int dit = 1;
@@ -148,7 +160,7 @@ public class JavaMetrics extends AbstractMetric {
         db.commitDBSession();
     }
 
-    protected void parseFile(ProjectFile pf) throws Exception {
+    protected void parseFile(IProjectFile pf) throws Exception {
 
         if (pf.getIsDirectory() || pf.isDeleted() ||
                 !pf.getName().endsWith(".java")) {
@@ -189,8 +201,8 @@ public class JavaMetrics extends AbstractMetric {
         walker.walk(t);
 
         //Data for associated classes/methods
-        List<ExecutionUnit> methods = pf.getChangedExecutionUnits();
-        Set<EncapsulationUnit> classes = pf.getEncapsulationUnits();
+        List<ExecUnit> methods = pf.getChangedExecutionUnits();
+        Set<EncapsUnit> classes = pf.getEncapsulationUnits();
         Set<String> foundClasses = entityExtractor.getResults().keySet();
 
         //Make class graph
@@ -210,10 +222,10 @@ public class JavaMetrics extends AbstractMetric {
         // WMC + MCCABE results in one go
         Metric m = Metric.getMetricByMnemonic("WMC");
         SortedMap<String, Integer> MCCABEresults = mcCabeCalculator.getResults();
-        for (EncapsulationUnit clazz : classes) {
+        for (EncapsUnit clazz : classes) {
             Integer wmc = 0;
 
-            for (ExecutionUnit method : clazz.getExecUnits()) {
+            for (ExecUnit method : clazz.getExecUnits()) {
                 Integer res = MCCABEresults.get(method.getFullyQualifiedName());
 
                 if (res == null) {
@@ -233,7 +245,7 @@ public class JavaMetrics extends AbstractMetric {
         }
 
         // NUMM results
-        for (EncapsulationUnit clazz : classes) {
+        for (EncapsUnit clazz : classes) {
             EncapsulationUnitMeasurement eum =
                     new EncapsulationUnitMeasurement(clazz,
                             Metric.getMetricByMnemonic("NUMM"),
@@ -242,9 +254,9 @@ public class JavaMetrics extends AbstractMetric {
         }
     }
 
-    private void writeClassResults(Set<EncapsulationUnit> classes,
+    private void writeClassResults(Set<EncapsUnit> classes,
                                    Map<String, Integer> results, Metric m) {
-        for (EncapsulationUnit clazz : classes) {
+        for (EncapsUnit clazz : classes) {
             Integer res = results.get(clazz.getName());
 
             if (res == null) {

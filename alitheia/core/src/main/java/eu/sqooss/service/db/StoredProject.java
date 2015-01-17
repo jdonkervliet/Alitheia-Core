@@ -74,7 +74,7 @@ import eu.sqooss.service.db.BugStatus.Status;
 @XmlRootElement(name="project")
 @Entity
 @Table(name="STORED_PROJECT")
-public class StoredProject extends DAObject {
+public class StoredProject extends DAObject implements Project{
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -89,8 +89,8 @@ public class StoredProject extends DAObject {
     /**
      * The versions that this project contains
      */
-    @OneToMany(fetch=FetchType.LAZY, mappedBy="project", cascade=CascadeType.ALL)
-    private List<ProjectVersion> projectVersions;
+    @OneToMany(fetch=FetchType.LAZY, mappedBy="project", cascade=CascadeType.ALL, targetEntity=ProjectVersion.class)
+    private List<Version> projectVersions;
     
     @OneToMany(fetch=FetchType.LAZY, mappedBy="storedProject", cascade=CascadeType.ALL)
     private Set<Developer> developers;
@@ -176,15 +176,15 @@ public class StoredProject extends DAObject {
     	addConfig(ConfigOption.PROJECT_ML_URL, url);
     }
     
-    public List<ProjectVersion> getProjectVersions() {
+    public List<Version> getProjectVersions() {
         return projectVersions;
     }
 
-    public List<ProjectVersion> getTaggedVersions() {
+    public List<Version> getTaggedVersions() {
         return Tag.getTaggedVersions(this);
     }
     
-    public void setProjectVersions(List<ProjectVersion> projectVersions) {
+    public void setProjectVersions(List<Version> projectVersions) {
         this.projectVersions = projectVersions;
     }
 

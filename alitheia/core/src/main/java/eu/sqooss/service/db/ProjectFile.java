@@ -69,7 +69,7 @@ import eu.sqooss.service.util.FileUtils;
 @Entity
 @Table(name="PROJECT_FILE")
 @XmlRootElement(name="file")
-public class ProjectFile extends DAObject{
+public class ProjectFile extends DAObject implements IProjectFile{
     
     private static final String qPrevVersion = "select pf from ProjectVersion pv, ProjectFile pf where pf.projectVersion = pv.id and pv.project.id = :paramProject and pv.sequence < :paramsequence and  pf.name = :paramFile and pf.dir.id = :paramDir order by pv.sequence desc";
     private static final String qPrevVersionCopy = "select pf from ProjectVersion pv, ProjectFile pf where pf.projectVersion = pv.id and pv.project.id = :paramProject and pv.sequence < :paramsequence and ((pf.name = :paramFile and pf.dir.id = :paramDir) or ( pf.name = :paramCopyFromName and pf.dir.id = :paramCopyFromDir)) order by pv.sequence desc";
@@ -93,9 +93,9 @@ public class ProjectFile extends DAObject{
     /**
      * the version of the project to which this file relates
      */
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, targetEntity=ProjectVersion.class)
     @JoinColumn(name="PROJECT_VERSION_ID")
-    private ProjectVersion projectVersion;
+    private Version projectVersion;
 
     /**
      * The file's status in this revision 
@@ -124,24 +124,24 @@ public class ProjectFile extends DAObject{
      * The start revision a file has been valid from (the 
      * addition/copy revision)
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity=ProjectVersion.class)
     @JoinColumn(name="VALID_FROM_ID")
-    private ProjectVersion validFrom;
+    private Version validFrom;
     
     /**
      * The revision this file version stopped being 
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity=ProjectVersion.class)
     @JoinColumn(name="VALID_TO_ID")
-    private ProjectVersion validUntil;
+    private Version validUntil;
 
     /**
      * The ProjectFile this file was copied from. Only gets a value 
      * for file copy operations
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity=ProjectFile.class)
     @JoinColumn(name="COPY_FROM_ID")
-    private ProjectFile copyFrom;
+    private IProjectFile copyFrom;
     
     /**
      * If this "file" contains source code files, it is marked as a module
@@ -159,14 +159,14 @@ public class ProjectFile extends DAObject{
     /**
      * Classes defined in this file
      */
-    @OneToMany(mappedBy = "file", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<EncapsulationUnit> encapsulationUnits;
+    @OneToMany(mappedBy = "file", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, targetEntity=EncapsulationUnit.class)
+    private Set<EncapsUnit> encapsulationUnits;
     
     /**
      * Methods defined in this file
      */
-    @OneToMany(mappedBy = "file", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<ExecutionUnit> executionUnits;
+    @OneToMany(mappedBy = "file", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, targetEntity=ExecutionUnit.class)
+    private Set<ExecUnit> executionUnits;
     
     public ProjectFile() {
         // Nothing to see here
@@ -174,7 +174,7 @@ public class ProjectFile extends DAObject{
         module = null;
     }
 
-    public ProjectFile(ProjectVersion pv) {
+    public ProjectFile(Version pv) {
         this();
         this.projectVersion = pv;
         this.setValidFrom(pv);
@@ -190,7 +190,7 @@ public class ProjectFile extends DAObject{
      *          and the version does not match (e.g. assigning a version from
      *          a different project to a file).
      */
-    public ProjectFile(ProjectFile f, ProjectVersion v) 
+    public ProjectFile(IProjectFile f, Version v) 
         throws IllegalArgumentException {
         if (f.getProjectVersion().getProject().getId() != v.getProject().getId()) {
             throw new IllegalArgumentException(
@@ -227,11 +227,11 @@ public class ProjectFile extends DAObject{
         return name;
     }
 
-    public void setProjectVersion(ProjectVersion projectVersion ) {
+    public void setProjectVersion(Version projectVersion ) {
         this.projectVersion = projectVersion;
     }
 
-    public ProjectVersion getProjectVersion() {
+    public Version getProjectVersion() {
         return projectVersion;
     }
 
@@ -295,27 +295,27 @@ public class ProjectFile extends DAObject{
         this.dir = dir;
     }
     
-    public ProjectVersion getValidFrom() {
+    public Version getValidFrom() {
         return validFrom;
     }
 
-    public void setValidFrom(ProjectVersion validFrom) {
+    public void setValidFrom(Version validFrom) {
         this.validFrom = validFrom;
     }
 
-    public ProjectVersion getValidUntil() {
+    public Version getValidUntil() {
         return validUntil;
     }
 
-    public void setValidUntil(ProjectVersion validUntil) {
+    public void setValidUntil(Version validUntil) {
         this.validUntil = validUntil;
     }
     
-    public ProjectFile getCopyFrom() {
+    public IProjectFile getCopyFrom() {
         return copyFrom;
     }
 
-    public void setCopyFrom(ProjectFile copyFrom) {
+    public void setCopyFrom(IProjectFile copyFrom) {
         this.copyFrom = copyFrom;
     }
 
@@ -328,23 +328,23 @@ public class ProjectFile extends DAObject{
     }
     
 
-    public void setEncapsulationUnits(Set<EncapsulationUnit> encapsulationUnits) {
+    public void setEncapsulationUnits(Set<EncapsUnit> encapsulationUnits) {
         this.encapsulationUnits = encapsulationUnits;
     }
 
-    public Set<EncapsulationUnit> getEncapsulationUnits() {
+    public Set<EncapsUnit> getEncapsulationUnits() {
         if (encapsulationUnits == null)
-            encapsulationUnits = new HashSet<EncapsulationUnit>();
+            encapsulationUnits = new HashSet<EncapsUnit>();
         return encapsulationUnits;
     }
     
-    public void setExecutionUnits(Set<ExecutionUnit> executionUnits) {
+    public void setExecutionUnits(Set<ExecUnit> executionUnits) {
         if (executionUnits == null)
-            executionUnits = new HashSet<ExecutionUnit>();
+            executionUnits = new HashSet<ExecUnit>();
         this.executionUnits = executionUnits;
     }
 
-    public Set<ExecutionUnit> getExecutionUnits() {
+    public Set<ExecUnit> getExecutionUnits() {
         return executionUnits;
     }
     
@@ -366,6 +366,7 @@ public class ProjectFile extends DAObject{
      * 
      * @return The corresponding <code>Directory</code> DAO
      */
+    // TODO: Impossible: "getFileName() == null"
     public Directory toDirectory() {
         if ((isDirectory) && (getFileName() != null)) {
             DBService dbs = AlitheiaCore.getInstance().getDBService();
@@ -385,7 +386,7 @@ public class ProjectFile extends DAObject{
      * @return The previous file revision, or null if the file is not found
      * or if the file was added in the provided revision
      */
-    public ProjectFile getPreviousFileVersion() {
+    public IProjectFile getPreviousFileVersion() {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
 
         //No need to query if a file was just added
@@ -432,7 +433,8 @@ public class ProjectFile extends DAObject{
      * @return The project version's number where this file was deleted,
      *   or <code>null</code> if this file still exist.
      */
-    public static ProjectVersion getDeletionVersion(ProjectFile pf) {
+    // TODO: Why is this static?
+    public static Version getDeletionVersion(ProjectFile pf) {
         DBService db = AlitheiaCore.getInstance().getDBService();
 
         // Skip files which are in a "DELETED" state
@@ -481,7 +483,7 @@ public class ProjectFile extends DAObject{
         params.put(paramProject, pf.getProjectVersion().getProject());
         params.put(paramOrder, pf.getProjectVersion().getSequence());
 
-        List<ProjectVersion> pvs = (List<ProjectVersion>) db.doHQL(query, params);
+        List<Version> pvs = (List<Version>) db.doHQL(query, params);
                        
         if (pvs.size() <= 0)
             return null;
@@ -642,14 +644,15 @@ public class ProjectFile extends DAObject{
         return pfs.get(0);
     }
     
-    public List<ExecutionUnit> getChangedExecutionUnits() {
+    public List<ExecUnit> getChangedExecutionUnits() {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
         Map<String, Object> params = new HashMap<String, Object>();
         
         params.put("file", this);
-        return (List<ExecutionUnit>)dbs.doHQL(qChangedMethods, params);
+        return (List<ExecUnit>)dbs.doHQL(qChangedMethods, params);
     }
     
+    // TODO: Impossible condition (can not be false)
     public String toString() {
     	StringBuilder sb  = new StringBuilder();
         return sb.append(projectVersion.getRevisionId())
@@ -676,6 +679,16 @@ public class ProjectFile extends DAObject{
 		hash = 31 * hash + (null == dir ? 0 : dir.hashCode());
 		hash = 31 * hash + (null == projectVersion ? 0 : projectVersion.hashCode());
 		return hash;
+	}
+	
+	public static List<ProjectFile> getProjectFilesByState(ProjectFileState state) {
+    	DBService dbs = AlitheiaCore.getInstance().getDBService();
+    	String paramState = "paramState";
+    	String query = "SELECT pf FROM ProjectFile pf WHERE pf.state = :" + paramState;
+    	
+    	Map<String, Object> params = new HashMap<String, Object>();
+    	params.put(paramState, state);
+    	return (List<ProjectFile>) dbs.doHQL(query, params);
 	}
 }
 

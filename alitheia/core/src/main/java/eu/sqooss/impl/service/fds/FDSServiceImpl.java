@@ -36,20 +36,17 @@ package eu.sqooss.impl.service.fds;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import eu.sqooss.service.util.FileUtils;
-import org.apache.commons.codec.binary.Hex;
 import org.osgi.framework.BundleContext;
 
 import eu.sqooss.core.AlitheiaCore;
 import eu.sqooss.service.db.DBService;
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.ProjectFile;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.db.StoredProject;
@@ -67,6 +64,7 @@ import eu.sqooss.service.tds.ProjectAccessor;
 import eu.sqooss.service.tds.Revision;
 import eu.sqooss.service.tds.SCMAccessor;
 import eu.sqooss.service.tds.TDSService;
+import eu.sqooss.service.util.FileUtils;
 
 /** {@inheritDoc} */
 public class FDSServiceImpl implements FDSService, Runnable {
@@ -187,7 +185,7 @@ public class FDSServiceImpl implements FDSService, Runnable {
      * @return The SCM revision for the project or null if the project file is
      *         deleted or otherwise unavailable.
      */
-    private Revision projectFileRevision(ProjectFile pf) {
+    private Revision projectFileRevision(IProjectFile pf) {
         // Make sure that the file exists in the specified project version
         String fileStatus = pf.getState().toString();
         if (PathChangeType.valueOf(fileStatus) == PathChangeType.DELETED) {
@@ -246,7 +244,7 @@ public class FDSServiceImpl implements FDSService, Runnable {
      *            The project file to look up.
      * @return The accessor or null on failure.
      */
-    private SCMAccessor projectFileAccessor(ProjectFile pf) {
+    private SCMAccessor projectFileAccessor(IProjectFile pf) {
         // Retrieve the project ID
         long projectId = pf.getProjectVersion().getProject().getId();
 
@@ -465,7 +463,7 @@ public class FDSServiceImpl implements FDSService, Runnable {
     }
 
     /** {@inheritDoc} */
-    public InputStream getFileContents(ProjectFile pf) {
+    public InputStream getFileContents(IProjectFile pf) {
 
         Revision projectRevision = projectFileRevision(pf);
         if (projectRevision == null) {

@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "execution-unit")
 @Entity
 @Table(name = "EXECUTION_UNIT")
-public class ExecutionUnit extends DAObject {
+public class ExecutionUnit extends DAObject implements ExecUnit{
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -46,9 +46,9 @@ public class ExecutionUnit extends DAObject {
     @JoinColumn(name = "ENCAPSULATION_UNIT_ID")
     private EncapsulationUnit encapsulationUnit;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity=ProjectFile.class)
     @JoinColumn(name = "PROJECT_FILE_ID")
-    private ProjectFile file;
+    private IProjectFile file;
 
     @Column(name = "CHANGED")
     @XmlElement
@@ -99,11 +99,11 @@ public class ExecutionUnit extends DAObject {
         this.encapsulationUnit = encapsulationUnit;
     }
 
-    public void setFile(ProjectFile file) {
+    public void setFile(IProjectFile file) {
         this.file = file;
     }
 
-    public ProjectFile getFile() {
+    public IProjectFile getFile() {
         return file;
     }
 

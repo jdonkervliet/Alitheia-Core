@@ -45,7 +45,7 @@ import eu.sqooss.service.db.DBService;
 import eu.sqooss.service.db.Developer;
 import eu.sqooss.service.db.MailMessage;
 import eu.sqooss.service.db.MailingList;
-import eu.sqooss.service.db.StoredProject;
+import eu.sqooss.service.db.Project;
 import eu.sqooss.service.logging.Logger;
 import eu.sqooss.service.scheduler.Job;
 import eu.sqooss.service.tds.MailAccessor;
@@ -63,7 +63,7 @@ public class MailMessageJob extends Job{
     Logger logger;
     String fileName;
     MailingList ml;
-    StoredProject project;
+    Project project;
     int progress = 0;
     
     public MailMessageJob(MailingList ml, String f, Logger l) {

@@ -33,9 +33,9 @@ public class EncapsulationUnitMeasurement extends MetricMeasurement {
     /**
      * The encapsulation unit against which the measurement was made
      */ 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, targetEntity=EncapsulationUnit.class)
     @JoinColumn(name = "ENCAPSULATION_UNIT_ID", referencedColumnName = "ENCAPSULATION_UNIT_ID")
-    private EncapsulationUnit encapsulationUnit;
+    private EncapsUnit encapsulationUnit;
     
     /**
      * The metric to which this result belongs
@@ -52,7 +52,7 @@ public class EncapsulationUnitMeasurement extends MetricMeasurement {
 
     public EncapsulationUnitMeasurement(){}
     
-    public EncapsulationUnitMeasurement(EncapsulationUnit eu, Metric m, String result) {
+    public EncapsulationUnitMeasurement(EncapsUnit eu, Metric m, String result) {
         this.encapsulationUnit = eu;
         this.metric = m;
         this.result = result;
@@ -66,11 +66,11 @@ public class EncapsulationUnitMeasurement extends MetricMeasurement {
         this.id = id;
     }
 
-    public EncapsulationUnit getEncapsulationUnit() {
+    public EncapsUnit getEncapsulationUnit() {
         return encapsulationUnit;
     }
 
-    public void setEncapsulationUnit(EncapsulationUnit encapsulationUnit) {
+    public void setEncapsulationUnit(EncapsUnit encapsulationUnit) {
         this.encapsulationUnit = encapsulationUnit;
     }
 

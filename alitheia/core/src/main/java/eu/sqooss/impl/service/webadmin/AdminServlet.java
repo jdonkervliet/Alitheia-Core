@@ -33,21 +33,10 @@
 
 package eu.sqooss.impl.service.webadmin;
 
-import eu.sqooss.core.AlitheiaCore;
-import eu.sqooss.impl.service.webadmin.WebAdminRenderer;
-import eu.sqooss.service.admin.AdminAction;
-import eu.sqooss.service.admin.AdminService;
-import eu.sqooss.service.admin.actions.AddProject;
-import eu.sqooss.service.db.DBService;
-import eu.sqooss.service.logging.Logger;
-import eu.sqooss.service.util.Pair;
-import eu.sqooss.service.webadmin.WebadminService;
-
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-
 import java.util.Hashtable;
 import java.util.Locale;
 
@@ -57,295 +46,292 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
-
+import org.apache.velocity.app.VelocityEngine;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
+
+import eu.sqooss.core.AlitheiaCore;
+import eu.sqooss.service.admin.AdminAction;
+import eu.sqooss.service.admin.AdminService;
+import eu.sqooss.service.admin.actions.AddProject;
+import eu.sqooss.service.db.DBService;
+import eu.sqooss.service.logging.Logger;
+import eu.sqooss.service.util.Pair;
+import eu.sqooss.service.webadmin.WebadminService;
 
 public class AdminServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
-    private static BundleContext bc = null;
-    private static WebadminService webadmin = null;
+	private static final long serialVersionUID = 1L;
+	private static BundleContext bc = null;
+	private static WebadminService webadmin = null;
 
-    /// Logger given by our owner to write log messages to.
-    private Logger logger = null;
-    
-    private DBService db = null;
+	// / Logger given by our owner to write log messages to.
+	private Logger logger = null;
 
-    // Content tables
-    private Hashtable<String, String> dynamicContentMap = null;
-    private Hashtable<String, Pair<String, String>> staticContentMap = null;
+	private DBService db = null;
 
-    // Dynamic substitutions
-    VelocityContext vc = null;
-    VelocityEngine ve = null;
+	// Content tables
+	private Hashtable<String, String> dynamicContentMap = null;
+	private Hashtable<String, Pair<String, String>> staticContentMap = null;
 
-    // Renderer of content
-    WebAdminRenderer adminView = null;
+	// Dynamic substitutions
+	VelocityContext vc = null;
+	VelocityEngine ve = null;
 
-    // Plug-ins view
-    PluginsView pluginsView = null;
+	// Renderer of content
+	WebAdminRenderer adminView = null;
 
-    // Projects view
-    ProjectsView projectsView = null;
+	// Plug-ins view
+	PluginsView pluginsView = null;
 
-    TranslationProxy tr = new TranslationProxy();
-    
-    public AdminServlet(BundleContext bc,
-            WebadminService webadmin,
-            Logger logger,
-            VelocityEngine ve) {
-        AdminServlet.webadmin = webadmin;
-        AdminServlet.bc = bc;
-        this.ve = ve;
-        this.logger = logger;
-        
-        AlitheiaCore core = AlitheiaCore.getInstance();
-        db = core.getDBService();
-        
-        // Create the static content map
-        staticContentMap = new Hashtable<String, Pair<String, String>>();
-        addStaticContent("/screen.css", "text/css");
-        addStaticContent("/webadmin.css", "text/css");
-        addStaticContent("/sqo-oss.png", "image/x-png");
-        addStaticContent("/queue.png", "image/x-png");
-        addStaticContent("/uptime.png", "image/x-png");
-        addStaticContent("/greyBack.jpg", "image/x-jpg");
-        addStaticContent("/projects.png", "image/x-png");
-        addStaticContent("/logs.png", "image/x-png");
-        addStaticContent("/metrics.png", "image/x-png");
-        addStaticContent("/gear.png", "image/x-png");
-        addStaticContent("/header-repeat.png", "image/x-png");
-        addStaticContent("/add_user.png", "image/x-png");
-        addStaticContent("/edit.png", "image/x-png");
-        addStaticContent("/jobs.png", "image/x-png");
-        addStaticContent("/rules.png", "image/x-png");
+	// Projects view
+	ProjectsView projectsView = null;
 
-        // Create the dynamic content map
-        dynamicContentMap = new Hashtable<String, String>();
-        dynamicContentMap.put("/", "index.html");
-        dynamicContentMap.put("/index", "index.html");
-        dynamicContentMap.put("/projects", "projects.html");
-        dynamicContentMap.put("/projectlist", "projectslist.html");
-        dynamicContentMap.put("/logs", "logs.html");
-        dynamicContentMap.put("/jobs", "jobs.html");
-        dynamicContentMap.put("/alljobs", "alljobs.html");
-        dynamicContentMap.put("/users", "users.html");
-        dynamicContentMap.put("/rules", "rules.html");
-        dynamicContentMap.put("/jobstat", "jobstat.html");
+	TranslationProxy tr = new TranslationProxy();
 
-        // Now the dynamic substitutions and renderer
-        vc = new VelocityContext();
-        adminView = new WebAdminRenderer(bc, vc);
+	public AdminServlet(BundleContext bc, WebadminService webadmin,
+			Logger logger, VelocityEngine ve) {
+		AdminServlet.webadmin = webadmin;
+		AdminServlet.bc = bc;
+		this.ve = ve;
+		this.logger = logger;
 
-        // Create the various view objects
-        pluginsView = new PluginsView(bc, vc);
-        projectsView = new ProjectsView(bc, vc);
-    }
+		AlitheiaCore core = AlitheiaCore.getInstance();
+		db = core.getDBService();
 
-    /**
-     * Add content to the static map
-     */
-    private void addStaticContent(String path, String type) {
-        Pair<String, String> p = new Pair<String, String> (path,type);
-        staticContentMap.put(path, p);
-    }
+		// Create the static content map
+		staticContentMap = new Hashtable<String, Pair<String, String>>();
+		addStaticContent("/screen.css", "text/css");
+		addStaticContent("/webadmin.css", "text/css");
+		addStaticContent("/sqo-oss.png", "image/x-png");
+		addStaticContent("/queue.png", "image/x-png");
+		addStaticContent("/uptime.png", "image/x-png");
+		addStaticContent("/greyBack.jpg", "image/x-jpg");
+		addStaticContent("/projects.png", "image/x-png");
+		addStaticContent("/logs.png", "image/x-png");
+		addStaticContent("/metrics.png", "image/x-png");
+		addStaticContent("/gear.png", "image/x-png");
+		addStaticContent("/header-repeat.png", "image/x-png");
+		addStaticContent("/add_user.png", "image/x-png");
+		addStaticContent("/edit.png", "image/x-png");
+		addStaticContent("/jobs.png", "image/x-png");
+		addStaticContent("/rules.png", "image/x-png");
 
-    protected void doGet(HttpServletRequest request,
-                         HttpServletResponse response) throws ServletException,
-                                                              IOException {
-        if (!db.isDBSessionActive()) {
-            db.startDBSession();
-        } 
-        
-        try {
-            String query = request.getPathInfo();
+		// Create the dynamic content map
+		dynamicContentMap = new Hashtable<String, String>();
+		dynamicContentMap.put("/", "index.html");
+		dynamicContentMap.put("/index", "index.html");
+		dynamicContentMap.put("/projects", "projects.html");
+		dynamicContentMap.put("/projectlist", "projectslist.html");
+		dynamicContentMap.put("/logs", "logs.html");
+		dynamicContentMap.put("/jobs", "jobs.html");
+		dynamicContentMap.put("/alljobs", "alljobs.html");
+		dynamicContentMap.put("/users", "users.html");
+		dynamicContentMap.put("/rules", "rules.html");
+		dynamicContentMap.put("/jobstat", "jobstat.html");
 
-            // Add the request to the log
-            logger.debug("GET:" + query);
+		// Now the dynamic substitutions and renderer
+		vc = new VelocityContext();
+		adminView = new WebAdminRenderer(bc, vc);
 
-            // This is static content
-            if (query.startsWith("/stop")) {
-                vc.put("RESULTS", "<p>Alitheia Core is now shutdown.</p>");
-                sendPage(response, request, "/results.html");
+		// Create the various view objects
+		pluginsView = new PluginsView(bc, vc);
+		projectsView = new ProjectsView(bc, vc, ve);
+	}
 
-                // Now stop the system
-                logger.info("System stopped by user request to webadmin.");
-                try {
-                    bc.getBundle(0).stop();
-                } catch (BundleException be) {
-                    logger.warn("Could not stop bundle 0.");
-                    // And ignore
-                }
-                return;
-            }
-            if (query.startsWith("/restart")) {
-                vc.put("RESULTS", "<p>Alitheia Core is now restarting.</p>");
-                sendPage(response, request, "/results.html");
+	/**
+	 * Add content to the static map
+	 */
+	private void addStaticContent(String path, String type) {
+		Pair<String, String> p = new Pair<String, String>(path, type);
+		staticContentMap.put(path, p);
+	}
 
-                //FIXME: How do we do a restart?
-                return;
-            }
-            else if ((query != null) && (staticContentMap.containsKey(query))) {
-                sendResource(response, staticContentMap.get(query));
-            }
-            else if ((query != null) && (dynamicContentMap.containsKey(query))) {
-                sendPage(response, request, dynamicContentMap.get(query));
-            }
-        } catch (NullPointerException e) {
-            logger.warn("Got a NPE while rendering a page.",e);
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } finally {
-            if (db.isDBSessionActive()) {
-                db.commitDBSession();
-            }
-        }
-    }
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		if (!db.isDBSessionActive()) {
+			db.startDBSession();
+		}
 
-    protected void doPost(HttpServletRequest request,
-                          HttpServletResponse response) throws ServletException,
-                                                               IOException {
-        if (!db.isDBSessionActive()) {
-            db.startDBSession();
-        } 
-        
-        try {
-            String query = request.getPathInfo();
-            logger.debug("POST:" + query);
+		try {
+			String query = request.getPathInfo();
 
-            if (query.startsWith("/addproject")) {
-                //addProject(request);
-                sendPage(response, request, "/results.html");
-            } else if (query.startsWith("/diraddproject")) {
-                AdminService as = AlitheiaCore.getInstance().getAdminService();
-                AdminAction aa = as.create(AddProject.MNEMONIC);
-                aa.addArg("dir", request.getParameter("properties"));
-                as.execute(aa);
-                if (aa.hasErrors())
-                	vc.put("RESULTS", aa.errors());
-                else
-                	vc.put("RESULTS", aa.results());
-                sendPage(response, request, "/results.html");
-            } else {
-                doGet(request,response);
-            }
-        } catch (NullPointerException e) {
-            logger.warn("Got a NPE while handling POST data.");
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } finally {
-            if (db.isDBSessionActive()) {
-                db.commitDBSession();
-            }
-        }
-    }
-    
-    /**
-     * Sends a resource (stored in the jar file) as a response. The mime-type
-     * is set to @p mimeType . The @p path to the resource should start
-     * with a / .
-     *
-     * Test cases:
-     *   - null mimetype, null path, bad path, relative path, path not found,
-     *   - null response
-     *
-     * TODO: How to simulate conditions that will cause IOException
-     */
-    protected void sendResource(HttpServletResponse response, Pair<String,String> source)
-        throws ServletException, IOException {
-        
-        InputStream istream = getClass().getResourceAsStream(source.first);
-        if ( istream == null ) {
-            throw new IOException("Path not found: " + source.first);
-        }
+			// Add the request to the log
+			logger.debug("GET:" + query);
 
-        byte[] buffer = new byte[1024];
-        int bytesRead = 0;
-        int totalBytes = 0;
+			// This is static content
+			if (query.startsWith("/stop")) {
+				vc.put("RESULTS", "<p>Alitheia Core is now shutdown.</p>");
+				sendPage(response, request, "/results.html");
 
-        response.setContentType(source.second);
-        ServletOutputStream ostream = response.getOutputStream();
-        while ((bytesRead = istream.read(buffer)) > 0) {
-            ostream.write(buffer,0,bytesRead);
-            totalBytes += bytesRead;
-        }
-    }
+				// Now stop the system
+				logger.info("System stopped by user request to webadmin.");
+				try {
+					bc.getBundle(0).stop();
+				} catch (BundleException be) {
+					logger.warn("Could not stop bundle 0.");
+					// And ignore
+				}
+				return;
+			}
+			if (query.startsWith("/restart")) {
+				vc.put("RESULTS", "<p>Alitheia Core is now restarting.</p>");
+				sendPage(response, request, "/results.html");
 
-    protected void sendPage(
-            HttpServletResponse response,
-            HttpServletRequest request,
-            String path)
-        throws ServletException, IOException {
-        Template t = null;
-        try {
-            t = ve.getTemplate( path );
-        } catch (Exception e) {
-            logger.warn("Failed to get template <" + path + ">");
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
-        StringWriter writer = new StringWriter();
-        PrintWriter print = response.getWriter();
+				// FIXME: How do we do a restart?
+				return;
+			} else if ((query != null) && (staticContentMap.containsKey(query))) {
+				sendResource(response, staticContentMap.get(query));
+			} else if ((query != null)
+					&& (dynamicContentMap.containsKey(query))) {
+				sendPage(response, request, dynamicContentMap.get(query));
+			}
+		} catch (NullPointerException e) {
+			logger.warn("Got a NPE while rendering a page.", e);
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		} finally {
+			if (db.isDBSessionActive()) {
+				db.commitDBSession();
+			}
+		}
+	}
 
-        // Do any substitutions that may be required
-        createSubstitutions(request);
-        response.setContentType("text/html");
-        t.merge(vc, writer);
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		if (!db.isDBSessionActive()) {
+			db.startDBSession();
+		}
 
-        print.print(writer.toString());
-    }
+		try {
+			String query = request.getPathInfo();
+			logger.debug("POST:" + query);
 
-    private void createSubstitutions(HttpServletRequest request) {
-        // Initialize the resource bundles with the provided locale
-        AbstractView.initResources(Locale.ENGLISH);
+			if (query.startsWith("/addproject")) {
+				// addProject(request);
+				sendPage(response, request, "/results.html");
+			} else if (query.startsWith("/diraddproject")) {
+				AdminService as = AlitheiaCore.getInstance().getAdminService();
+				AdminAction aa = as.create(AddProject.MNEMONIC);
+				aa.addArg("dir", request.getParameter("properties"));
+				as.execute(aa);
+				if (aa.hasErrors())
+					vc.put("RESULTS", aa.errors());
+				else
+					vc.put("RESULTS", aa.results());
+				sendPage(response, request, "/results.html");
+			} else {
+				doGet(request, response);
+			}
+		} catch (NullPointerException e) {
+			logger.warn("Got a NPE while handling POST data.");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		} finally {
+			if (db.isDBSessionActive()) {
+				db.commitDBSession();
+			}
+		}
+	}
 
-        // Simple string substitutions
-        vc.put("APP_NAME", AbstractView.getLbl("app_name"));
-        vc.put("COPYRIGHT",
-                "Copyright 2007-2008"
-                + "<a href=\"http://www.sqo-oss.eu/about/\">"
-                + "&nbsp;SQO-OSS Consortium Members"
-                + "</a>");
-        vc.put("LOGO", "<img src='/logo' id='logo' alt='Logo' />");
-        vc.put("UPTIME", WebAdminRenderer.getUptime());
+	/**
+	 * Sends a resource (stored in the jar file) as a response. The mime-type is
+	 * set to @p mimeType . The @p path to the resource should start with a / .
+	 *
+	 * Test cases: - null mimetype, null path, bad path, relative path, path not
+	 * found, - null response
+	 *
+	 * TODO: How to simulate conditions that will cause IOException
+	 */
+	protected void sendResource(HttpServletResponse response,
+			Pair<String, String> source) throws ServletException, IOException {
 
-        // Object-based substitutions
-        vc.put("scheduler", adminView.sobjSched.getSchedulerStats());
-        vc.put("tr",tr); // translations proxy
-        vc.put("admin",adminView);
-        vc.put("projects",projectsView);
-        vc.put("metrics",pluginsView);
-        vc.put("request", request); // The request can be used by the render() methods
-    }  
-    
-    /**
-     * This is a class whose sole purpose is to provide a useful API from
-     * within Velocity templates for the translation functions offered by
-     * the AbstractView. Only one object needs to be created, and it
-     * forwards all the label(), message() and error() calls to the translation
-     * methods of the view.
-     */
-    public class TranslationProxy {
-        public TranslationProxy() { 
-        }
-        
-        /** Translate a label */
-        public String label(String s) {
-            return AbstractView.getLbl(s);
-        }
-        
-        /** Translate a (multi-line, html formatted) message */
-        public String message(String s) {
-            return AbstractView.getMsg(s);
-        }
-        
-        /** Translate an error message */
-        public String error(String s) {
-            return AbstractView.getErr(s);
-        }
-    }
+		InputStream istream = getClass().getResourceAsStream(source.first);
+		if (istream == null) {
+			throw new IOException("Path not found: " + source.first);
+		}
+
+		byte[] buffer = new byte[1024];
+		int bytesRead = 0;
+		int totalBytes = 0;
+
+		response.setContentType(source.second);
+		ServletOutputStream ostream = response.getOutputStream();
+		while ((bytesRead = istream.read(buffer)) > 0) {
+			ostream.write(buffer, 0, bytesRead);
+			totalBytes += bytesRead;
+		}
+	}
+
+	protected void sendPage(HttpServletResponse response,
+			HttpServletRequest request, String path) throws ServletException,
+			IOException {
+		Template t = null;
+		try {
+			t = ve.getTemplate(path);
+		} catch (Exception e) {
+			logger.warn("Failed to get template <" + path + ">");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			return;
+		}
+		StringWriter writer = new StringWriter();
+		PrintWriter print = response.getWriter();
+
+		// Do any substitutions that may be required
+		createSubstitutions(request);
+		response.setContentType("text/html");
+		t.merge(vc, writer);
+
+		print.print(writer.toString());
+	}
+
+	private void createSubstitutions(HttpServletRequest request) {
+		// Initialize the resource bundles with the provided locale
+		AbstractView.initResources(Locale.ENGLISH);
+
+		// Simple string substitutions
+		vc.put("APP_NAME", AbstractView.getLbl("app_name"));
+		vc.put("COPYRIGHT", "Copyright 2007-2008"
+				+ "<a href=\"http://www.sqo-oss.eu/about/\">"
+				+ "&nbsp;SQO-OSS Consortium Members" + "</a>");
+		vc.put("LOGO", "<img src='/logo' id='logo' alt='Logo' />");
+		vc.put("UPTIME", WebAdminRenderer.getUptime());
+
+		// Object-based substitutions
+		vc.put("scheduler", adminView.sobjSched.getSchedulerStats());
+		vc.put("tr", tr); // translations proxy
+		vc.put("admin", adminView);
+		vc.put("projects", projectsView);
+		vc.put("metrics", pluginsView);
+		vc.put("request", request); // The request can be used by the render()
+									// methods
+	}
+
+	/**
+	 * This is a class whose sole purpose is to provide a useful API from within
+	 * Velocity templates for the translation functions offered by the
+	 * AbstractView. Only one object needs to be created, and it forwards all
+	 * the label(), message() and error() calls to the translation methods of
+	 * the view.
+	 */
+	public class TranslationProxy {
+		public TranslationProxy() {
+		}
+
+		/** Translate a label */
+		public String label(String s) {
+			return AbstractView.getLbl(s);
+		}
+
+		/** Translate a (multi-line, html formatted) message */
+		public String message(String s) {
+			return AbstractView.getMsg(s);
+		}
+
+		/** Translate an error message */
+		public String error(String s) {
+			return AbstractView.getErr(s);
+		}
+	}
 }
 
 // vi: ai nosi sw=4 ts=4 expandtab

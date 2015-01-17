@@ -38,6 +38,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import eu.sqooss.service.db.Directory;
+import eu.sqooss.service.db.IProjectFile;
 import eu.sqooss.service.db.ProjectFile;
 import eu.sqooss.service.db.ProjectVersion;
 import eu.sqooss.service.util.FileUtils;
@@ -151,7 +152,7 @@ public class InMemoryDirectory {
     /**
      * Returns the list of files this directory contains.
      */
-    public List<ProjectFile> getFiles() {
+    public List<IProjectFile> getFiles() {
         @SuppressWarnings("unused")
         ArrayList<ProjectFile> result = new ArrayList<ProjectFile>(files.size());
         

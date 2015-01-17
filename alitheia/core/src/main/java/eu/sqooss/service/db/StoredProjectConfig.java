@@ -51,37 +51,37 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import eu.sqooss.core.AlitheiaCore;
 
-@XmlRootElement(name="project-config")
+@XmlRootElement(name = "project-config")
 @Entity
-@Table(name="STORED_PROJECT_CONFIG")
+@Table(name = "STORED_PROJECT_CONFIG")
 public class StoredProjectConfig extends DAObject {
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	@Column(name="STORED_PROJECT_CONFIG_ID")
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "STORED_PROJECT_CONFIG_ID")
 	private long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="CONFIG_OPTION_ID")
-	private ConfigurationOption confOpt;
+	@ManyToOne(fetch = FetchType.LAZY, targetEntity=ConfigurationOption.class)
+	@JoinColumn(name = "CONFIG_OPTION_ID")
+	private IConfigurationOption confOpt;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="STORED_PROJECT_ID")
-	private StoredProject project;
+	@ManyToOne(fetch = FetchType.LAZY, targetEntity = StoredProject.class)
+	@JoinColumn(name = "STORED_PROJECT_ID")
+	private Project project;
 
-	@Column(name="VALUE")
-	@XmlElement(name="value")
+	@Column(name = "VALUE")
+	@XmlElement(name = "value")
 	private String value;
 
-	public StoredProjectConfig() {}
-	
-	public StoredProjectConfig(ConfigurationOption co, String value, 
-			StoredProject sp) {
+	public StoredProjectConfig() {
+	}
+
+	public StoredProjectConfig(IConfigurationOption co, String value, Project sp) {
 		this.confOpt = co;
 		this.value = value;
 		this.project = sp;
 	}
-	
+
 	public long getId() {
 		return id;
 	}
@@ -89,37 +89,37 @@ public class StoredProjectConfig extends DAObject {
 	public void setId(long id) {
 		this.id = id;
 	}
-	
-	public ConfigurationOption getConfOpt() {
+
+	public IConfigurationOption getConfOpt() {
 		return confOpt;
 	}
-	
-	public void setConfOpt(ConfigurationOption confOpt) {
+
+	public void setConfOpt(IConfigurationOption confOpt) {
 		this.confOpt = confOpt;
 	}
-	
-	public StoredProject getProject() {
+
+	public Project getProject() {
 		return project;
 	}
-	
-	public void setProject(StoredProject project) {
+
+	public void setProject(Project project) {
 		this.project = project;
 	}
-	
+
 	public String getValue() {
 		return value;
 	}
-	
+
 	public void setValue(String value) {
 		this.value = value;
 	}
-	
-	public static List<StoredProjectConfig> fromProject(StoredProject sp) {
+
+	public static List<StoredProjectConfig> fromProject(Project sp) {
 		DBService dbs = AlitheiaCore.getInstance().getDBService();
-		
+
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("project", sp);
-		
+
 		return dbs.findObjectsByProperties(StoredProjectConfig.class, params);
 	}
 }

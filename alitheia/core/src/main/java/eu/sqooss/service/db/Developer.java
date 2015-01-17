@@ -69,7 +69,7 @@ import eu.sqooss.service.db.DAObject;
 @XmlRootElement
 @Entity
 @Table(name="DEVELOPER")
-public class Developer extends DAObject {
+public class Developer extends DAObject implements IDeveloper{
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -101,28 +101,22 @@ public class Developer extends DAObject {
     /**
      * The project this developer belongs to
      */
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, targetEntity=StoredProject.class)
 	@JoinColumn(name="STORED_PROJECT_ID")
-    private StoredProject storedProject;
+    private Project storedProject;
 	
     /**
      * The list of commits from this developer
      */
-    @OneToMany(fetch=FetchType.LAZY, mappedBy="committer", orphanRemoval=true)
-    private Set<ProjectVersion> commits;
+    @OneToMany(fetch=FetchType.LAZY, mappedBy="committer", orphanRemoval=true, targetEntity=ProjectVersion.class)
+    private Set<Version> commits;
 	
     /**
      * The list of mails sent by this developer
      */
-    @OneToMany(fetch=FetchType.LAZY, mappedBy="sender", orphanRemoval=true)
-    private Set<MailMessage> mails;
+    @OneToMany(fetch=FetchType.LAZY, mappedBy="sender", orphanRemoval=true, targetEntity=MailMessage.class)
+    private Set<IMailMessage> mails;
 	
-    /**
-     * The list of bug report messages sent by this developer
-     */
-    @OneToMany(fetch=FetchType.LAZY, mappedBy="reporter", orphanRemoval=true)
-    private Set<BugReportMessage> bugReportMessages;
-
     public long getId() {
 		return id;
 	}
@@ -147,38 +141,30 @@ public class Developer extends DAObject {
         this.username = username;
     }
 
-    public StoredProject getStoredProject() {
+    public Project getStoredProject() {
         return storedProject;
     }
 
-    public void setStoredProject(StoredProject storedProject) {
+    public void setStoredProject(Project storedProject) {
         this.storedProject = storedProject;
     }
     
-    public Set<ProjectVersion> getCommits() {
+    public Set<Version> getCommits() {
         return commits;
     }
 
-    public void setCommits(Set<ProjectVersion> commits) {
+    public void setCommits(Set<Version> commits) {
         this.commits = commits;
     }
 
-    public Set<MailMessage> getMails() {
+    public Set<IMailMessage> getMails() {
         return mails;
     }
 
-    public void setMails(Set<MailMessage> mails) {
+    public void setMails(Set<IMailMessage> mails) {
         this.mails = mails;
     }
 
-    public Set<BugReportMessage> getBugReportMessages() {
-        return bugReportMessages;
-    }
-
-    public void setBugReportMessages(Set<BugReportMessage> bugReportMessages) {
-        this.bugReportMessages = bugReportMessages;
-    }
-    
     public Set<DeveloperAlias> getAliases() {
         return aliases;
     }
@@ -194,8 +180,7 @@ public class Developer extends DAObject {
      */
     public void addAlias(String email) {
         DeveloperAlias da = new DeveloperAlias(email, this);
-        if (! getAliases().contains(da))
-            getAliases().add(da);
+        getAliases().add(da);
     }
     
     /**
@@ -206,15 +191,15 @@ public class Developer extends DAObject {
      * 
      * @param email
      *            The Developer's email
-     * @param sp The StoredProject this Developer belongs to
+     * @param sp The Project this Developer belongs to
      * @return A Developer record for the specified Developer or null when:
      *         <ul>
-     *         <li>The passed StoredProject does not exist</li>
+     *         <li>The passed Project does not exist</li>
      *         <li>The passed email is invalid syntactically</li>
      *         <ul>
      */
     public static Developer getDeveloperByEmail(String email, 
-            StoredProject sp) {
+    		Project sp) {
         return getDeveloperByEmail(email, sp, true);
     }
     
@@ -226,15 +211,15 @@ public class Developer extends DAObject {
      * the provided email and returned.
      * 
      * @param email The Developer's email
-     * @param sp The StoredProject this Developer belongs to
+     * @param sp The Project this Developer belongs to
      * @return A Developer record for the specified Developer or null when:
      *         <ul>
-     *         <li>The passed StoredProject does not exist</li>
+     *         <li>The passed Project does not exist</li>
      *         <li>The passed email is invalid syntactically</li>
      *         <ul>
      */
     public static synchronized Developer getDeveloperByEmail(String email,
-            StoredProject sp, boolean create){
+    		Project sp, boolean create){
         DBService dbs = AlitheiaCore.getInstance().getDBService();
         
         String paramProject = "project";
@@ -319,7 +304,7 @@ public class Developer extends DAObject {
      * @return A Developer record for the specified Developer or null on failure
      */
     public static Developer getDeveloperByUsername(String username, 
-            StoredProject sp) {
+            Project sp) {
         return getDeveloperByUsername(username, sp, true);
     }
     
@@ -338,9 +323,8 @@ public class Developer extends DAObject {
      *         to retrieve or create an entry.
      * 
      */    
-    @SuppressWarnings("unchecked")
     public static synchronized Developer getDeveloperByUsername(String username,
-            StoredProject sp, boolean create) {
+    		Project sp, boolean create) {
 		
         DBService dbs = AlitheiaCore.getInstance().getDBService();
 
@@ -406,7 +390,7 @@ public class Developer extends DAObject {
      * @return
      */
     public static synchronized Developer getDeveloperByName(String name, 
-            StoredProject sp, boolean create) {
+    		Project sp, boolean create) {
         
         DBService dbs = AlitheiaCore.getInstance().getDBService();
 
@@ -431,6 +415,8 @@ public class Developer extends DAObject {
         return d;
     }
     
+    // TODO: Weird things with comma
+    // TODO: Space is kept, comma is removed.
     public String toString() {
         StringBuffer dev =  new StringBuffer(); 
         dev.append(name).append(", aka:").append(username).append(" (");

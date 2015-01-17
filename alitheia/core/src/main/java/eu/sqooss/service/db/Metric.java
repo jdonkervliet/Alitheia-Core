@@ -36,7 +36,6 @@ package eu.sqooss.service.db;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -47,7 +46,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -82,9 +80,9 @@ public class Metric extends DAObject {
 	/**
 	 * the Alitheia Core plugin providing the functionality for this metric
 	 */
-	@ManyToOne(fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch=FetchType.LAZY, cascade = CascadeType.ALL, targetEntity=Plugin.class)
 	@JoinColumn(name="PLUGIN_ID", referencedColumnName="PLUGIN_ID")
-	private Plugin plugin;
+	private IPlugin plugin;
 
 	/**
 	 * A representation of the type of metric: SOURCE_CODE - Relating to SVN
@@ -111,30 +109,6 @@ public class Metric extends DAObject {
 	@Column(name="DESCRIPTION")
 	private String description;
 	
-	@OneToMany(mappedBy="metric", cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<StoredProjectMeasurement> projectMeasurements;
-
-	@OneToMany(mappedBy="metric", cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<ProjectVersionMeasurement> versionMeasurements;
-
-    @OneToMany(mappedBy="metric", cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<ProjectFileMeasurement> fileMeasurements;
-	
-    @OneToMany(mappedBy="metric", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<NameSpaceMeasurement> nsMeasurements;
-
-    @OneToMany(mappedBy="metric", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<EncapsulationUnitMeasurement> encUnitMeasurements;
-    
-    @OneToMany(mappedBy="metric", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ExecutionUnitMeasurement> execUnitMeasurements;
-    
-    @OneToMany(mappedBy="metric", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MailingListThreadMeasurement> mlThreadMeasurements;
-    
-    @OneToMany(mappedBy="metric", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MailMessageMeasurement> mmMeasurements;
-
     public Metric() {
 		// Nothing to do here
 	}
@@ -163,11 +137,11 @@ public class Metric extends DAObject {
 		this.description = description;
 	}
 
-	public Plugin getPlugin() {
+	public IPlugin getPlugin() {
 		return plugin;
 	}
 
-	public void setPlugin(Plugin plugin) {
+	public void setPlugin(IPlugin plugin) {
 		this.plugin = plugin;
 	}
 
@@ -179,80 +153,11 @@ public class Metric extends DAObject {
 		this.mnemonic = mnemonic;
 	}
 
-	public Set<StoredProjectMeasurement> getProjectMeasurements() {
-		return projectMeasurements;
-	}
-
-	public void setProjectMeasurements(
-			Set<StoredProjectMeasurement> projectMeasurements) {
-		this.projectMeasurements = projectMeasurements;
-	}
-
-	public Set<ProjectVersionMeasurement> getVersionMeasurements() {
-		return versionMeasurements;
-	}
-
-	public void setVersionMeasurements(
-			Set<ProjectVersionMeasurement> versionMeasurements) {
-		this.versionMeasurements = versionMeasurements;
-	}
-
-	public Set<ProjectFileMeasurement> getFileMeasurements() {
-		return fileMeasurements;
-	}
-
-	public void setFileMeasurements(Set<ProjectFileMeasurement> fileMeasurements) {
-		this.fileMeasurements = fileMeasurements;
-	}
-	
-    
-    public Set<NameSpaceMeasurement> getNsMeasurements() {
-        return nsMeasurements;
-    }
-
-    public void setNsMeasurements(Set<NameSpaceMeasurement> nsMeasurements) {
-        this.nsMeasurements = nsMeasurements;
-    }
-
-    public Set<EncapsulationUnitMeasurement> getEncUnitMeasurements() {
-        return encUnitMeasurements;
-    }
-
-    public void setEncUnitMeasurements(
-            Set<EncapsulationUnitMeasurement> encUnitMeasurements) {
-        this.encUnitMeasurements = encUnitMeasurements;
-    }
-
-    public Set<ExecutionUnitMeasurement> getExecUnitMeasurements() {
-        return execUnitMeasurements;
-    }
-
-    public void setExecUnitMeasurements(
-            Set<ExecutionUnitMeasurement> execUnitMeasurements) {
-        this.execUnitMeasurements = execUnitMeasurements;
-    }
-
-    public Set<MailingListThreadMeasurement> getMlThreadMeasurements() {
-        return mlThreadMeasurements;
-    }
-
-    public void setMlThreadMeasurements(
-            Set<MailingListThreadMeasurement> mlThreadMeasurements) {
-        this.mlThreadMeasurements = mlThreadMeasurements;
-    }
-
-    public Set<MailMessageMeasurement> getMmMeasurements() {
-        return mmMeasurements;
-    }
-
-    public void setMmMeasurements(Set<MailMessageMeasurement> mmMeasurements) {
-        this.mmMeasurements = mmMeasurements;
-    }
 
 	/**
 	 * Check whether the metric was ever run on the provided project.
 	 */
-	public boolean isEvaluated (StoredProject p) {
+	public boolean isEvaluated (Project p) {
 		DBService dbs = AlitheiaCore.getInstance().getDBService();
 		StringBuffer query = new StringBuffer();
 
@@ -292,6 +197,7 @@ public class Metric extends DAObject {
                 .append("where nm=:metric ")
                 .append("and nm.namespace.changeVersion.project=:project");
             break;
+		case PROJECT:
 		case BUG:
 		case MAILING_LIST:
 		case DEVELOPER:
@@ -308,7 +214,8 @@ public class Metric extends DAObject {
 		return false;
 	}
 
-	@Override
+	//TODO: this.equals(that) != that.equals(this)
+	@Override 
 	public boolean equals(Object obj) {
 		if ((obj == null) || (!(obj instanceof Metric))) {
 			return false;
@@ -366,6 +273,21 @@ public class Metric extends DAObject {
 	public static List<Metric> getAllMetrics() {
 		DBService dbs = AlitheiaCore.getInstance().getDBService();
 		return (List<Metric>) dbs.doHQL("from Metric");
+	}
+	
+	/**
+	 * Get all metrics for the given type
+	 * @param type to filter on.
+	 * @return all metrics of this type.
+	 */
+	public static List<Metric> getMetricsByType(MetricType type) {
+    	DBService dbs = AlitheiaCore.getInstance().getDBService();
+    	String paramType = "paramType";
+    	String query = "SELECT m FROM Metric m WHERE m.metricType = :" + paramType;
+    	
+    	Map<String, Object> params = new HashMap<String, Object>();
+    	params.put(paramType, type);
+    	return (List<Metric>) dbs.doHQL(query, params);
 	}
 }
 

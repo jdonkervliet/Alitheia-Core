@@ -81,28 +81,28 @@ public class Branch extends DAObject {
 	@XmlElement
 	private String name;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch=FetchType.LAZY, targetEntity=StoredProject.class)
 	@JoinColumn(name="STORED_PROJECT_ID")
 	@XmlElement
-	private StoredProject project;
+	private Project project;
 	
-	@ManyToMany
+	@ManyToMany(targetEntity=ProjectVersion.class)
 	@JoinTable(
       name="BRANCH_INCOMING",
       inverseJoinColumns={@JoinColumn(name="PROJECT_VERSION_ID", referencedColumnName="PROJECT_VERSION_ID")},
       joinColumns={@JoinColumn(name="BRANCH_ID", referencedColumnName="BRANCH_ID")})
-    private Set<ProjectVersion> branchIncoming = new HashSet<ProjectVersion>();
+    private Set<Version> branchIncoming = new HashSet<Version>();
 	
-    @ManyToMany
+    @ManyToMany(targetEntity=ProjectVersion.class)
     @JoinTable(
       name="BRANCH_OUTGOING",
       inverseJoinColumns={@JoinColumn(name="PROJECT_VERSION_ID", referencedColumnName="PROJECT_VERSION_ID")},
       joinColumns={@JoinColumn(name="BRANCH_ID", referencedColumnName="BRANCH_ID")})
-    private Set<ProjectVersion> branchOutgoing = new HashSet<ProjectVersion>();
+    private Set<Version> branchOutgoing = new HashSet<Version>();
 	
     public Branch() {}
     
-    public Branch(StoredProject sp, String name) {
+    public Branch(Project sp, String name) {
         this.project = sp;
         this.name = name;
     }
@@ -122,31 +122,31 @@ public class Branch extends DAObject {
 		this.name = name;
 	}
 	
-	public void setProject(StoredProject project) {
+	public void setProject(Project project) {
 		this.project = project;
 	}
 
-	public StoredProject getProject() {
+	public Project getProject() {
 		return project;
 	}
 	
-	public Set<ProjectVersion> getBranchIncoming() {
+	public Set<Version> getBranchIncoming() {
         return branchIncoming;
     }
 
-    public void setBranchIncoming(Set<ProjectVersion> branchIncoming) {
+    public void setBranchIncoming(Set<Version> branchIncoming) {
         this.branchIncoming = branchIncoming;
     }
 
-    public Set<ProjectVersion> getBranchOutgoing() {
+    public Set<Version> getBranchOutgoing() {
         return branchOutgoing;
     }
 
-    public void setBranchOutgoing(Set<ProjectVersion> branchOutgoing) {
+    public void setBranchOutgoing(Set<Version> branchOutgoing) {
         this.branchOutgoing = branchOutgoing;
     }
 	
-	public static Branch fromName(StoredProject sp, String name, boolean create) {
+	public static Branch fromName(Project sp, String name, boolean create) {
 		DBService db = AlitheiaCore.getInstance().getDBService();
 		Map<String, Object> params = new HashMap<String, Object>();
 		
@@ -167,7 +167,7 @@ public class Branch extends DAObject {
 		return branches.get(0);
 	}
 
-    public static String suggestName(StoredProject sp) {
+    public static String suggestName(Project sp) {
         DBService db = AlitheiaCore.getInstance().getDBService();
 
         Map<String, Object> params = new HashMap<String, Object>();

@@ -36,6 +36,7 @@ package eu.sqooss.service.metricactivator;
 import eu.sqooss.core.AlitheiaCoreService;
 import eu.sqooss.service.abstractmetric.AlitheiaPlugin;
 import eu.sqooss.service.db.DAObject;
+import eu.sqooss.service.db.IDAObject;
 import eu.sqooss.service.db.StoredProject;
 
 /**
@@ -52,7 +53,7 @@ public interface MetricActivator extends AlitheiaCoreService {
 	 * @param <T> The resource to run the metric on
 	 * @param ap The plug-in to execute
 	 */
-	public <T extends DAObject> void runMetric(T resource, AlitheiaPlugin ap);
+	public <T extends IDAObject> void runMetric(T resource, AlitheiaPlugin ap);
 	
     /**
      * Runs all metrics that support the given activation type, on the

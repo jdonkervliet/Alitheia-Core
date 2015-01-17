@@ -33,6 +33,8 @@
 
 package eu.sqooss.service.db;
 
+import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -64,9 +66,9 @@ public class MailMessageMeasurement extends MetricMeasurement {
 	/**
      * The thread against which the measurement was made
      */ 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, targetEntity=MailMessage.class)
     @JoinColumn(name = "MAILMESSAGE_ID", referencedColumnName = "MAILMESSAGE_ID")
-    private MailMessage mail;
+    private IMailMessage mail;
     
     public MailMessageMeasurement() {
         super();
@@ -93,7 +95,7 @@ public class MailMessageMeasurement extends MetricMeasurement {
      * @param mail Mail message this measurement is for
      * @param value (String) value representation of the measurement
      */
-    public MailMessageMeasurement(Metric m, MailMessage mail, String value) {
+    public MailMessageMeasurement(Metric m, IMailMessage mail, String value) {
         super();
         setMetric(m);
         setMail(mail);
@@ -108,11 +110,11 @@ public class MailMessageMeasurement extends MetricMeasurement {
 		this.id = id;
 	}
     
-    public MailMessage getMail() {
+    public IMailMessage getMail() {
         return mail;
     }
 
-    public void setMail(MailMessage mail) {
+    public void setMail(IMailMessage mail) {
         this.mail = mail;
     }
     

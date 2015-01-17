@@ -39,6 +39,7 @@ import javax.mail.internet.MimeMessage;
 
 import eu.sqooss.core.AlitheiaCore;
 import eu.sqooss.service.db.DBService;
+import eu.sqooss.service.db.IMailMessage;
 import eu.sqooss.service.db.MailMessage;
 import eu.sqooss.service.db.MailingList;
 import eu.sqooss.service.db.MailingListThread;
@@ -255,7 +256,7 @@ public class MailThreadResolver implements MetadataUpdater {
                         debug("Reconstructing thread " + thr.getId());
 
                         /* New top level email added, increase depth level in children messages */
-                        for (MailMessage msg : thr.getMessages()) {
+                        for (IMailMessage msg : thr.getMessages()) {
                             msg.setDepth(msg.getDepth() + 1);
                         }
                         updatedThreads++;

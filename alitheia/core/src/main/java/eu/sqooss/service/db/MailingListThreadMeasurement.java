@@ -33,6 +33,10 @@
 
 package eu.sqooss.service.db;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -46,89 +50,108 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import eu.sqooss.core.AlitheiaCore;
+
 /**
- * Instances of this class represent a measurement made against a
- * specific mailing list thread, as stored in the database
+ * Instances of this class represent a measurement made against a specific
+ * mailing list thread, as stored in the database
  */
 @Entity
-@Table(name="ML_THREAD_MEASUREMENT")
-@XmlRootElement(name="mlthread-measurement")
+@Table(name = "ML_THREAD_MEASUREMENT")
+@XmlRootElement(name = "mlthread-measurement")
 public class MailingListThreadMeasurement extends MetricMeasurement {
 
 	@Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "ML_THREAD_MEASUREMENT_ID")
-    @XmlElement(name = "id")
-	private long id; 
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "ML_THREAD_MEASUREMENT_ID")
+	@XmlElement(name = "id")
+	private long id;
 
 	/**
-     * The thread against which the measurement was made
-     */
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "THREAD_ID", referencedColumnName = "MLTHREAD_ID")
-    private MailingListThread thread;
+	 * The thread against which the measurement was made
+	 */
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinColumn(name = "THREAD_ID", referencedColumnName = "MLTHREAD_ID")
+	private MailingListThread thread;
 
-    public MailingListThreadMeasurement() {
-        super();
-    }
+	public MailingListThreadMeasurement() {
+		super();
+	}
 
-    /**
-     * The metric to which this result belongs
-     */
-    @ManyToOne(fetch=FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name="METRIC_ID", referencedColumnName="METRIC_ID")
-    private Metric metric;
+	/**
+	 * The metric to which this result belongs
+	 */
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinColumn(name = "METRIC_ID", referencedColumnName = "METRIC_ID")
+	private Metric metric;
 
-    /**
-     * A representation of the calculation result
-     */
-    @Column(name="RESULT")
-    private String result;
-   
-    /**
-     * Convenience constructor to avoid having to call three methods
-     * to set up sensible values in a measurement.
-     * 
-     * @param m Metric this measurement is from
-     * @param mt Thread this measurement is for
-     * @param value (String) value representation of the measurement
-     */
-    public MailingListThreadMeasurement(Metric m, MailingListThread mt, String value) {
-        super();
-        setMetric(m);
-        setThread(mt);
-        setResult(value);
-    }
-    
-    public long getId() {
+	/**
+	 * A representation of the calculation result
+	 */
+	@Column(name = "RESULT")
+	private String result;
+
+	/**
+	 * Convenience constructor to avoid having to call three methods to set up
+	 * sensible values in a measurement.
+	 * 
+	 * @param m
+	 *            Metric this measurement is from
+	 * @param mt
+	 *            Thread this measurement is for
+	 * @param value
+	 *            (String) value representation of the measurement
+	 */
+	public MailingListThreadMeasurement(Metric m, MailingListThread mt,
+			String value) {
+		super();
+		setMetric(m);
+		setThread(mt);
+		setResult(value);
+	}
+
+	public long getId() {
 		return id;
 	}
 
 	public void setId(long id) {
 		this.id = id;
 	}
-    
-    public MailingListThread getThread() {
-        return thread;
-    }
 
-    public void setThread(MailingListThread thread) {
-        this.thread = thread;
-    }
-    
-    public Metric getMetric() {
-        return metric;
-    }
+	public MailingListThread getThread() {
+		return thread;
+	}
 
-    public void setMetric(Metric metric) {
-        this.metric = metric;
-    }
+	public void setThread(MailingListThread thread) {
+		this.thread = thread;
+	}
 
-    public String getResult() {
-        return result;
-    }
+	public Metric getMetric() {
+		return metric;
+	}
 
-    public void setResult(String result) {
-        this.result = result;
-    }
+	public void setMetric(Metric metric) {
+		this.metric = metric;
+	}
+
+	public String getResult() {
+		return result;
+	}
+
+	public void setResult(String result) {
+		this.result = result;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<MailingListThreadMeasurement> getAllMeasurementsForThread(
+			MailingListThread thread) {
+		DBService dbs = AlitheiaCore.getInstance().getDBService();
+		String paramThread = "paramThread";
+		String query = "SELECT mltm FROM MailingListThreadMeasurement mltm "
+				+ "WHERE mltm.thread = :" + paramThread;
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put(paramThread, thread);
+		return (List<MailingListThreadMeasurement>) dbs.doHQL(query, params);
+	}
 }

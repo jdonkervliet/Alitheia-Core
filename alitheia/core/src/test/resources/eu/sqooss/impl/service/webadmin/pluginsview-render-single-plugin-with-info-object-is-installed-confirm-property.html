@@ -1,0 +1,45 @@
+<html>
+ <head></head> 
+ <body> 
+  <form id="metrics" name="metrics" method="post" action="/index"> 
+   <fieldset> 
+    <legend>Errors</legend> Property update has failed! Check log for details. 
+   </fieldset> 
+   <fieldset> 
+    <legend>Update property of null</legend> 
+    <table class="borderless"> 
+     <tbody> 
+      <tr> 
+       <td class="borderless" style="width:100px;"><b>Name</b></td> 
+       <td class="borderless">confirmProperty</td> 
+      </tr> 
+      <tr> 
+       <td class="borderless" style="width:100px;"><b>Description</b></td> 
+       <td class="borderless">confirmProperty</td> 
+      </tr> 
+      <tr> 
+       <td class="borderless" style="width:100px;"><b>Type</b></td> 
+       <td class="borderless"> confirmProperty </td> 
+      </tr> 
+      <tr> 
+       <td class="borderless" style="width:100px;"><b>Value</b></td> 
+       <td class="borderless"><input type="text" class="form" id="propertyValue" name="propertyValue" value="confirmProperty" /></td> 
+      </tr> 
+      <tr> 
+       <td colspan="2" class="borderless"><input type="button" class="install" style="width: 100px;" value="Update" onclick="javascript:document.getElementById('action').value='confirmProperty';document.metrics.submit();" />&nbsp; <input type="button" class="install" style="width: 100px;" value="Remove" onclick="javascript:document.getElementById('action').value='removeProperty';document.metrics.submit();" />&nbsp; <input type="button" class="install" style="width: 100px;" value="Cancel" onclick="javascript:document.metrics.submit();" /></td> 
+      </tr> 
+     </tbody> 
+    </table> 
+   </fieldset> 
+   <input type="hidden" id="action" name="action" value="" /> 
+   <input type="hidden" id="pluginHashcode" name="pluginHashcode" value="confirmProperty" /> 
+   <input type="hidden" id="propertyName" name="propertyName" value="confirmProperty" /> 
+   <input type="hidden" id="propertyDescription" name="propertyDescription" value="confirmProperty" /> 
+   <input type="hidden" id="propertyType" name="propertyType" value="confirmProperty" /> 
+   <input type="hidden" id="propertyValue" name="propertyValue" value="confirmProperty" /> 
+   <input type="hidden" id="showProperties" name="showProperties" value="false" /> 
+   <input type="hidden" id="showActivators" name="showActivators" value="false" /> 
+  </form>  
+ </body>
+</html>
+

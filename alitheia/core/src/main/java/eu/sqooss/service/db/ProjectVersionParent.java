@@ -56,19 +56,19 @@ public class ProjectVersionParent extends DAObject {
     @EmbeddedId
     private ProjectVersionParentId pk;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity=ProjectVersion.class)
     @MapsId(value = "parentid")
     @JoinColumn(name = "PARENT_ID")
-    private ProjectVersion parent;
+    private Version parent;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity=ProjectVersion.class)
     @MapsId(value = "childid")
     @JoinColumn(name = "CHILD_ID")
-    private ProjectVersion child;
+    private Version child;
 
     public ProjectVersionParent() {}
 
-    public ProjectVersionParent(ProjectVersion child, ProjectVersion parent) {
+    public ProjectVersionParent(Version child, Version parent) {
         this.child = child;
         this.parent = parent;
         ProjectVersionParentId id = new ProjectVersionParentId();
@@ -77,19 +77,19 @@ public class ProjectVersionParent extends DAObject {
         pk = id;
     }
 
-    public ProjectVersion getParent() {
+    public Version getParent() {
         return parent;
     }
 
-    public void setParent(ProjectVersion parent) {
+    public void setParent(Version parent) {
         this.parent = parent;
     }
 
-    public ProjectVersion getChild() {
+    public Version getChild() {
         return child;
     }
 
-    public void setChild(ProjectVersion child) {
+    public void setChild(Version child) {
         this.child = child;
     }
 

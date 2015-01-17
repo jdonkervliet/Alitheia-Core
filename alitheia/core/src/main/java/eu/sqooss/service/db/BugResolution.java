@@ -47,6 +47,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlElement;
 
+import org.hibernate.annotations.Filter;
+
 import eu.sqooss.core.AlitheiaCore;
 
 /**
@@ -68,10 +70,6 @@ public class BugResolution extends DAObject {
 	@Column(name="RESOLUTION")
     private String resolution;
 
-	/** Bugs in this resolution state*/
-	@OneToMany(mappedBy="resolution", orphanRemoval=true)
-    private Set<Bug> bugs;
-    
     public String getResolution() {
         return resolution;
     }
@@ -191,12 +189,4 @@ public class BugResolution extends DAObject {
         
         return bs;
     }
-
-	public void setBugs(Set<Bug> bugs) {
-		this.bugs = bugs;
-	}
-
-	public Set<Bug> getBugs() {
-		return bugs;
-	}
 }

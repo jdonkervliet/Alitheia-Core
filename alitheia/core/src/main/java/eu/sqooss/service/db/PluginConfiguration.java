@@ -70,9 +70,9 @@ public class PluginConfiguration extends DAObject {
 	@Column(name="MSG")
     private String msg;
 
-	@ManyToOne(fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch=FetchType.LAZY, cascade = CascadeType.ALL, targetEntity=Plugin.class)
 	@JoinColumn(name="PLUGIN_ID", referencedColumnName="PLUGIN_ID")
-    private Plugin plugin;
+    private IPlugin plugin;
 
     public long getId() {
 		return id;
@@ -98,11 +98,11 @@ public class PluginConfiguration extends DAObject {
         this.type = type;
     }
 
-    public Plugin getPlugin() {
+    public IPlugin getPlugin() {
         return plugin;
     }
 
-    public void setPlugin(Plugin p) {
+    public void setPlugin(IPlugin p) {
         this.plugin = p;
     }
 
@@ -125,7 +125,7 @@ public class PluginConfiguration extends DAObject {
     /**
      * Get a PluginConfiguration entry DAO or null in 
      */
-    public static PluginConfiguration getConfigurationEntry(Plugin p, HashMap<String, Object> names) {
+    public static PluginConfiguration getConfigurationEntry(IPlugin p, HashMap<String, Object> names) {
         DBService db = AlitheiaCore.getInstance().getDBService();
         
         names.put("plugin", p);
@@ -144,7 +144,7 @@ public class PluginConfiguration extends DAObject {
      * successfully true will be returned. If not found or the update 
      * fails, false will be returned.
      */
-    public static boolean updConfigurationEntry(Plugin p, HashMap<String, Object> names) {
+    public static boolean updConfigurationEntry(IPlugin p, HashMap<String, Object> names) {
         DBService db = AlitheiaCore.getInstance().getDBService();
         PluginConfiguration pc = getConfigurationEntry(p, names);
         

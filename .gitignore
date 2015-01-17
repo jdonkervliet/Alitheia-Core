@@ -17,3 +17,6 @@ bin/
 *.ipr
 *.iws
 *.db
+
+*.swp
+*.log

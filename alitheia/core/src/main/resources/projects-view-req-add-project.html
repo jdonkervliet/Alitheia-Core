@@ -1,0 +1,18 @@
+<table class="borderless" width='100%'>
+  #foreach ( $key in $normalInputRows.keySet() )
+    #set ( $title = $key )
+    #set ( $name = $normalInputRows.get($key) )
+    <tr>
+      <td class="borderless" style="width:100px"><b>$!title</b></td>
+      <td class="borderless">
+        <input type="text" class="form" id="$name" name="$name" value="" size="60">
+      </td>
+    </tr>
+  #end
+    <tr>
+      <td colspan="2" class="borderless">
+        <input type="button" class="install" style="width:100px;" value="$req-add-project-add-button-value" onclick="javascript:document.getElementById('$REQ_PAR_ACTION').value='$ACT_CON_ADD_PROJECT';$!{SUBMIT}">
+        <input type="button" class="install" style="width:100px;" value="Cancel" onclick="javascript:document.projects.submit();">
+      </td>
+    </tr>
+</table>

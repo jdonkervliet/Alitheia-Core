@@ -49,7 +49,6 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlElement;
 
 import eu.sqooss.core.AlitheiaCore;
-import eu.sqooss.service.db.DAObject;
 
 /**
  * Instances of this class represent the data of an SVN tag for a
@@ -69,9 +68,9 @@ public class Tag extends DAObject {
 	/**
      * The version of the project to which this tag relates
      */
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, targetEntity=ProjectVersion.class)
     @JoinColumn(name="TAG_VERSION")
-    private ProjectVersion projectVersion;
+    private Version projectVersion;
 
     /**
      * The name of the tag provided at the time it was committed by the
@@ -84,7 +83,7 @@ public class Tag extends DAObject {
         // Nothing to do
     }
     
-    public Tag(ProjectVersion pv) {
+    public Tag(Version pv) {
         this.projectVersion = pv;
     }
 
@@ -95,11 +94,11 @@ public class Tag extends DAObject {
 		this.id = id;
 	}
     
-    public ProjectVersion getProjectVersion() {
+    public Version getProjectVersion() {
         return projectVersion;
     }
 
-    public void setProjectVersion(ProjectVersion pv) {
+    public void setProjectVersion(Version pv) {
         this.projectVersion = pv;
     }
 
@@ -111,8 +110,8 @@ public class Tag extends DAObject {
         this.name = name;
     }
 
-    public static ProjectVersion getProjectVersionForNamedTag(String tagName,
-            StoredProject sp) {
+    public static Version getProjectVersionForNamedTag(String tagName,
+    		Project sp) {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
 
         String paramTagName = "tagname";
@@ -133,11 +132,11 @@ public class Tag extends DAObject {
         if (projectVersions == null || projectVersions.size() == 0) {
             return null;
         } else {
-            return (ProjectVersion) projectVersions.get(0);
+            return (Version) projectVersions.get(0);
         }
     }
     
-    public static List<ProjectVersion> getTaggedVersions(StoredProject sp) {
+    public static List<Version> getTaggedVersions(Project sp) {
         DBService dbs = AlitheiaCore.getInstance().getDBService();
 
         String paramProject = "project_id";
@@ -150,7 +149,7 @@ public class Tag extends DAObject {
         Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put(paramProject, sp);
 
-        return (List<ProjectVersion>) dbs.doHQL(query, parameters);
+        return (List<Version>) dbs.doHQL(query, parameters);
 
     }
 

@@ -1,0 +1,19 @@
+<form id="$form_id" name="$form_name" method="$form_method" action="$form_action">
+  #if ( $reqValAction.equals("conShowProject") && $selProject )
+    #parse ( "projects-view-con-show-project.html" )
+  #elseif ( $reqValAction.equals("reqAddProject") )
+    #parse ( "projects-view-req-add-project.html" )
+  #elseif ( $reqValAction.equals("reqRemProject") && $selProject )
+    #parse ( "projects-view-req-rem-project.html" )
+  #else
+    #parse ( "projects-view-default.html" )
+  #end
+  
+  #if ( $selProject )
+    #set ( $selProjectId = $selProject.getId() )
+  #end
+
+  <input type="hidden" id="$REQ_PAR_ACTION" name="$REQ_PAR_ACTION" value="">
+  <input type="hidden" id="$REQ_PAR_PROJECT_ID" name="$REQ_PAR_PROJECT_ID" value="$!selProjectId">
+  <input type="hidden" id="$REQ_PAR_SYNC_PLUGIN" name="$REQ_PAR_SYNC_PLUGIN" value="">
+</form>

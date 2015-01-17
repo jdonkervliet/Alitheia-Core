@@ -77,9 +77,9 @@ public class ProjectVersionMeasurement extends MetricMeasurement {
 	/**
      * The ProjectVersion to which the instance relates
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity=ProjectVersion.class)
     @JoinColumn(name = "PROJECT_VERSION_ID")
-    private ProjectVersion projectVersion;
+    private Version projectVersion;
 
     public ProjectVersionMeasurement() {
         super();
@@ -92,7 +92,7 @@ public class ProjectVersionMeasurement extends MetricMeasurement {
      * @param p Project version the metric was applied to
      * @param v Resulting value
      */
-    public ProjectVersionMeasurement(Metric m, ProjectVersion p, String v) {
+    public ProjectVersionMeasurement(Metric m, Version p, String v) {
         this();
         setMetric(m);
         setProjectVersion(p);
@@ -107,11 +107,11 @@ public class ProjectVersionMeasurement extends MetricMeasurement {
 		this.id = id;
 	}
     
-    public ProjectVersion getProjectVersion() {
+    public Version getProjectVersion() {
         return projectVersion;
     }
 
-    public void setProjectVersion(ProjectVersion projectVersion) {
+    public void setProjectVersion(Version projectVersion) {
         this.projectVersion = projectVersion;
     }
     
